@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SHADE — Evidence Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Oswald', sans-serif;
+    max-width: 420px;
+    margin: 0 auto;
+    background: #ffffff;
+  }
+
+  /* ── EVIDENCE PAGE (always underneath) ── */
+  .evidence-page {
+    height: 100vh;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .evidence-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #999;
+    text-align: center;
+  }
+
+  .evidence-title {
+    font-size: 28px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #111;
+    text-align: center;
+  }
+
+  .fp-wrapper {
+    width: 100%;
+    flex: 1;
+    background: #f5f5f3;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .fp-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .evidence-ref {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: #aaa;
+    text-align: center;
+  }
+
+  /* ── LOGIN OVERLAY ── */
+  .login-overlay {
+    position: fixed;
+    inset: 0;
+    max-width: 420px;
+    margin: 0 auto;
+    background: #0a0b0c;
+    color: #f0ece0;
+    padding: 40px 24px 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 100;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity  0.6s ease;
+    overflow: hidden;
+  }
+
+  .login-overlay.dismissed {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .access-heading {
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #c9a84c;
+    font-family: 'Courier Prime', monospace;
+    margin-bottom: 8px;
+  }
+
+  .access-title {
+    font-size: 32px;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    color: #f0ece0;
+  }
+
+  .access-instruction {
+    font-size: 17px;
+    font-weight: 400;
+    color: #adb3ba;
+    line-height: 1.6;
+  }
+
+  /* ── NAME BUTTONS ── */
+  .name-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .name-btn {
+    background: #1c1f22;
+    border: 1px solid #2c3035;
+    border-radius: 4px;
+    padding: 13px 8px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: #adb3ba;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.12s;
+    user-select: none;
+  }
+
+  .name-btn.selected {
+    background: #1a1200;
+    border-color: #c9a84c;
+    color: #e8c97a;
+  }
+
+  .name-btn:active { transform: scale(0.95); }
+
+  /* ── SUBMIT ── */
+  .btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: #c9a84c;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0a0b0c;
+    cursor: pointer;
+    opacity: 0.3;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+
+  .btn-submit.ready { opacity: 1; pointer-events: auto; }
+
+  /* ── ERROR ── */
+  .error-msg {
+    display: none;
+    font-family: 'Courier Prime', monospace;
+    font-size: 14px;
+    color: #e74c3c;
+    text-align: center;
+    padding: 14px;
+    border: 1px solid #b03a2e;
+    border-radius: 3px;
+  }
+
+  .error-msg.visible { display: block; }
+</style>
+</head>
+<body>
+
+<!-- EVIDENCE PAGE (always present underneath) -->
+<div class="evidence-page">
+  <div class="evidence-label">Exhibit FP-1</div>
+  <div class="evidence-title">Recovered Fingerprint</div>
+  <div class="fp-wrapper">
+    <img src="assets/img/evidence-env1.png" alt="Recovered Fingerprint" style="width:100%; border-radius:4px; display:block;">
+  </div>
+  <div class="evidence-ref">SHADE · Case File ENV-01 · For Comparison Only</div>
+</div>
+
+
+<!-- LOGIN OVERLAY (sits on top, slides away on success) -->
+<div class="login-overlay" id="login-overlay">
+
+  <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+    <img src="assets/img/shade-seal.png" alt="SHADE Seal" style="width:160px; height:160px; object-fit:contain;">
+    <div class="access-heading" style="text-align:center; font-size:11px;">SHADE · ENV-01</div>
+  </div>
+
+  <p class="access-instruction">Select the five verified operative code names to unlock the evidence.</p>
+
+  <div class="name-grid" id="name-grid"></div>
+
+  <div class="error-msg" id="error-msg">Access denied. Incorrect selection.</div>
+
+  <button class="btn-submit" id="btn-submit" onclick="submitAccess()">Access Evidence</button>
+
+</div>
+
+
+<script>
+  const CORRECT = new Set(['VESTA','ARES','HADES','FREYA','LOKI']);
+  const ALL = ['VESTA','ARES','HADES','FREYA','LOKI','ODIN','VISHNU','MARS','AMUN-RA'];
+  let selected = new Set();
+
+  const shuffled = [...ALL].sort(() => Math.random() - 0.5);
+  const grid = document.getElementById('name-grid');
+
+  shuffled.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'name-btn';
+    btn.textContent = name;
+    btn.onclick = () => {
+      if (selected.has(name)) {
+        selected.delete(name);
+        btn.classList.remove('selected');
+      } else {
+        if (selected.size >= 5) return;
+        selected.add(name);
+        btn.classList.add('selected');
+      }
+      document.getElementById('btn-submit').classList.toggle('ready', selected.size === 5);
+    };
+    grid.appendChild(btn);
+  });
+
+  function submitAccess() {
+    const correct = selected.size === 5 && [...selected].every(n => CORRECT.has(n));
+    if (correct) {
+      document.getElementById('login-overlay').classList.add('dismissed');
+    } else {
+      document.getElementById('error-msg').classList.add('visible');
+    }
+  }
+</script>
+</body>
+</html>
