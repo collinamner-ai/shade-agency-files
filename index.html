@@ -20,7 +20,9 @@
     background: #ffffff;
   }
 
-  /* ── EVIDENCE PAGE (always underneath) ── */
+  /* ════════════════════════════════════════
+     EVIDENCE PAGE (always underneath)
+  ════════════════════════════════════════ */
   .evidence-page {
     height: 100vh;
     padding: 32px 24px;
@@ -76,7 +78,9 @@
     text-align: center;
   }
 
-  /* ── LOGIN OVERLAY ── */
+  /* ════════════════════════════════════════
+     LOGIN OVERLAY
+  ════════════════════════════════════════ */
   .login-overlay {
     position: fixed;
     inset: 0;
@@ -84,13 +88,11 @@
     margin: 0 auto;
     background: #0a0b0c;
     color: #f0ece0;
-    padding: 40px 24px 36px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     z-index: 100;
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity  0.6s ease;
+                opacity 0.6s ease;
     overflow: hidden;
   }
 
@@ -100,27 +102,58 @@
     pointer-events: none;
   }
 
-  .access-heading {
-    font-size: 13px;
+  /* ── REUSABLE HEADER ──────────────────────
+     Copy .login-header and its children
+     onto any new evidence login page.
+     Only change the heading text and
+     instruction text per page.
+  ──────────────────────────────────────── */
+  .login-header {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 36px 24px 24px;
+    border-bottom: 1px solid #1c1f22;
+  }
+
+  .login-header img.seal {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+  }
+
+  .login-header .case-ref {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: #c9a84c;
-    font-family: 'Courier Prime', monospace;
-    margin-bottom: 8px;
+    text-align: center;
   }
 
-  .access-title {
-    font-size: 32px;
-    letter-spacing: 0.12em;
-    line-height: 1;
-    color: #f0ece0;
-  }
-
-  .access-instruction {
+  .login-header .instruction {
+    font-family: 'Oswald', sans-serif;
     font-size: 17px;
     font-weight: 400;
-    color: #adb3ba;
-    line-height: 1.6;
+    color: #ffffff;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ── LOGIN BODY (the interactive part) ───
+     This section changes per page.
+     Grows to fill remaining space.
+  ──────────────────────────────────────── */
+  .login-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px;
+    gap: 16px;
+    min-height: 0;
   }
 
   /* ── NAME BUTTONS ── */
@@ -154,10 +187,31 @@
 
   .name-btn:active { transform: scale(0.95); }
 
-  /* ── SUBMIT ── */
+  /* ── ERROR ── */
+  .error-msg {
+    display: none;
+    font-family: 'Courier Prime', monospace;
+    font-size: 14px;
+    color: #e74c3c;
+    text-align: center;
+    padding: 12px;
+    border: 1px solid #b03a2e;
+    border-radius: 3px;
+  }
+
+  .error-msg.visible { display: block; }
+
+  /* ── LOGIN FOOTER ─────────────────────────
+     Access button always pinned to bottom.
+  ──────────────────────────────────────── */
+  .login-footer {
+    flex-shrink: 0;
+    padding: 0 24px 36px;
+  }
+
   .btn-submit {
     width: 100%;
-    padding: 15px;
+    padding: 16px;
     background: #c9a84c;
     border: none;
     border-radius: 3px;
@@ -171,54 +225,48 @@
     opacity: 0.3;
     pointer-events: none;
     transition: opacity 0.15s;
-    flex-shrink: 0;
   }
 
   .btn-submit.ready { opacity: 1; pointer-events: auto; }
-
-  /* ── ERROR ── */
-  .error-msg {
-    display: none;
-    font-family: 'Courier Prime', monospace;
-    font-size: 14px;
-    color: #e74c3c;
-    text-align: center;
-    padding: 14px;
-    border: 1px solid #b03a2e;
-    border-radius: 3px;
-  }
-
-  .error-msg.visible { display: block; }
 </style>
 </head>
 <body>
 
-<!-- EVIDENCE PAGE (always present underneath) -->
+<!-- ════════════════════════════════════════
+     EVIDENCE PAGE (always underneath)
+════════════════════════════════════════ -->
 <div class="evidence-page">
   <div class="evidence-label">Exhibit FP-1</div>
   <div class="evidence-title">Recovered Fingerprint</div>
   <div class="fp-wrapper">
-    <img src="assets/img/evidence-env1.png" alt="Recovered Fingerprint" style="width:100%; border-radius:4px; display:block;">
+    <img src="assets/img/evidence-env1.png" alt="Recovered Fingerprint">
   </div>
   <div class="evidence-ref">SHADE · Case File ENV-01 · For Comparison Only</div>
 </div>
 
 
-<!-- LOGIN OVERLAY (sits on top, slides away on success) -->
+<!-- ════════════════════════════════════════
+     LOGIN OVERLAY
+════════════════════════════════════════ -->
 <div class="login-overlay" id="login-overlay">
 
-  <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
-    <img src="assets/img/shade-seal.png" alt="SHADE Seal" style="width:160px; height:160px; object-fit:contain;">
-    <div class="access-heading" style="text-align:center; font-size:11px;">SHADE · ENV-01</div>
+  <!-- ── REUSABLE HEADER ── copy this block to new pages, change text only -->
+  <div class="login-header">
+    <img class="seal" src="assets/img/shade-seal.png" alt="SHADE Seal">
+    <div class="case-ref">SHADE · ENV-01</div>
+    <p class="instruction">Select the five verified operative code names to unlock the evidence.</p>
   </div>
 
-  <p class="access-instruction">Select the five verified operative code names to unlock the evidence.</p>
+  <!-- ── LOGIN BODY ── swap this out per page -->
+  <div class="login-body">
+    <div class="name-grid" id="name-grid"></div>
+    <div class="error-msg" id="error-msg">Access denied. Incorrect selection.</div>
+  </div>
 
-  <div class="name-grid" id="name-grid"></div>
-
-  <div class="error-msg" id="error-msg">Access denied. Incorrect selection.</div>
-
-  <button class="btn-submit" id="btn-submit" onclick="submitAccess()">Access Evidence</button>
+  <!-- ── FOOTER ── always the same -->
+  <div class="login-footer">
+    <button class="btn-submit" id="btn-submit" onclick="submitAccess()">Access Evidence</button>
+  </div>
 
 </div>
 
