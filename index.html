@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 <title>SHADE — Evidence Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -11,6 +11,7 @@
   html, body {
     height: 100%;
     overflow: hidden;
+    touch-action: manipulation;
   }
 
   body {
@@ -24,13 +25,20 @@
      EVIDENCE PAGE (always underneath)
   ════════════════════════════════════════ */
   .evidence-page {
-    height: 100vh;
-    padding: 32px 24px;
+    position: fixed;
+    inset: 0;
+    max-width: 420px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
+    background: #ffffff;
+  }
+
+  .evidence-header {
+    flex-shrink: 0;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
   }
 
   .evidence-label {
@@ -39,43 +47,53 @@
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: #999;
-    text-align: center;
+    margin-bottom: 4px;
   }
 
   .evidence-title {
-    font-size: 28px;
+    font-size: 26px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: #111;
-    text-align: center;
+  }
+
+  .evidence-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    min-height: 0;
   }
 
   .fp-wrapper {
     width: 100%;
-    flex: 1;
-    background: #f5f5f3;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    min-height: 0;
   }
 
   .fp-wrapper img {
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
     display: block;
   }
 
-  .evidence-ref {
-    font-family: 'Courier Prime', monospace;
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    color: #aaa;
+  .evidence-footer {
+    flex-shrink: 0;
+    padding: 16px 24px 28px;
+    border-top: 1px solid #eee;
     text-align: center;
+  }
+
+  .evidence-footer-text {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: #bbb;
+    text-transform: uppercase;
   }
 
   /* ════════════════════════════════════════
@@ -236,10 +254,17 @@
      EVIDENCE PAGE (always underneath)
 ════════════════════════════════════════ -->
 <div class="evidence-page">
-  <div class="evidence-label">Exhibit FP-1</div>
-  <div class="evidence-title">Recovered Fingerprint</div>
-  <div class="fp-wrapper">
-    <img src="assets/img/evidence-env1.png" alt="Recovered Fingerprint">
+  <div class="evidence-header">
+    <div class="evidence-label">Exhibit FP-1</div>
+    <div class="evidence-title">Recovered Fingerprint</div>
+  </div>
+  <div class="evidence-body">
+    <div class="fp-wrapper">
+      <img src="assets/img/evidence-env1.png" alt="Recovered Fingerprint">
+    </div>
+  </div>
+  <div class="evidence-footer">
+    <div class="evidence-footer-text">SHADE · Case File ENV-01</div>
   </div>
 </div>
 
