@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>SHADE — Evidence Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -12,6 +15,7 @@
     height: 100%;
     overflow: hidden;
     touch-action: manipulation;
+    overscroll-behavior: none;
   }
 
   body {
@@ -19,6 +23,8 @@
     max-width: 420px;
     margin: 0 auto;
     background: #ffffff;
+    /* Lock portrait */
+    screen-orientation: portrait;
   }
 
   /* ════════════════════════════════════════
@@ -32,11 +38,14 @@
     display: flex;
     flex-direction: column;
     background: #ffffff;
+    /* safe areas for notch / home bar */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .evidence-header {
     flex-shrink: 0;
-    padding: 20px 24px 16px;
+    padding: 24px 24px 16px;
     border-bottom: 1px solid #eee;
     text-align: center;
   }
@@ -62,7 +71,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 20px 24px;
     min-height: 0;
   }
 
@@ -83,9 +92,11 @@
 
   .evidence-footer {
     flex-shrink: 0;
-    padding: 16px 24px 28px;
+    /* generous bottom buffer for home bar / short phones */
+    padding: 14px 24px max(24px, env(safe-area-inset-bottom, 24px));
     border-top: 1px solid #eee;
     text-align: center;
+    margin-bottom: 12px;
   }
 
   .evidence-footer-text {
@@ -112,6 +123,8 @@
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
                 opacity 0.6s ease;
     overflow: hidden;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .login-overlay.dismissed {
@@ -120,25 +133,20 @@
     pointer-events: none;
   }
 
-  /* ── REUSABLE HEADER ──────────────────────
-     Copy .login-header and its children
-     onto any new evidence login page.
-     Only change the heading text and
-     instruction text per page.
-  ──────────────────────────────────────── */
+  /* ── REUSABLE HEADER ── */
   .login-header {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 36px 24px 24px;
+    gap: 10px;
+    padding: 28px 24px 20px;
     border-bottom: 1px solid #1c1f22;
   }
 
   .login-header img.seal {
-    width: 150px;
-    height: 150px;
+    width: 140px;
+    height: 140px;
     object-fit: contain;
   }
 
@@ -160,21 +168,17 @@
     line-height: 1.4;
   }
 
-  /* ── LOGIN BODY (the interactive part) ───
-     This section changes per page.
-     Grows to fill remaining space.
-  ──────────────────────────────────────── */
+  /* ── LOGIN BODY ── */
   .login-body {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 24px;
-    gap: 16px;
+    padding: 20px 24px;
+    gap: 14px;
     min-height: 0;
   }
 
-  /* ── NAME BUTTONS ── */
   .name-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -205,7 +209,6 @@
 
   .name-btn:active { transform: scale(0.95); }
 
-  /* ── ERROR ── */
   .error-msg {
     display: none;
     font-family: 'Courier Prime', monospace;
@@ -219,12 +222,11 @@
 
   .error-msg.visible { display: block; }
 
-  /* ── LOGIN FOOTER ─────────────────────────
-     Access button always pinned to bottom.
-  ──────────────────────────────────────── */
+  /* ── LOGIN FOOTER ── */
   .login-footer {
     flex-shrink: 0;
-    padding: 0 24px 36px;
+    padding: 0 24px max(28px, env(safe-area-inset-bottom, 28px));
+    margin-bottom: 12px;
   }
 
   .btn-submit {
@@ -246,6 +248,26 @@
   }
 
   .btn-submit.ready { opacity: 1; pointer-events: auto; }
+
+  /* ── PORTRAIT LOCK ── */
+  @media screen and (orientation: landscape) {
+    body::after {
+      content: 'Please rotate your device to portrait mode';
+      position: fixed;
+      inset: 0;
+      background: #0a0b0c;
+      color: #c9a84c;
+      font-family: 'Oswald', sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 40px;
+    }
+  }
 </style>
 </head>
 <body>
