@@ -299,6 +299,16 @@ TR.on('value', function(snap){
   T=snap.val()||{};
   renderGrid();
   renderLeaderboard();
+
+  // Auto-pause if all active teams have finished
+  var active = Object.values(T).filter(function(t){ return t.enabled; });
+  if (active.length > 0 && active.every(function(t){ return t.completed; })) {
+    if (S.isRunning && !S.isPaused && S.startedAt) {
+      var elapsed = Date.now() - S.startedAt;
+      SR.update({ isPaused:true, pausedElapsed:elapsed });
+      toast('🏁 All teams complete — timer stopped');
+    }
+  }
 }, function(e){ banner('error','❌ Cannot read teams: '+e.message); });
 
 /* TICK */
