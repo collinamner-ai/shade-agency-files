@@ -1,799 +1,445 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>SHADE — Final Disarm</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
-<style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-:root {
-  --bg:      #000;
-  --surface: #080a0b;
-  --red:     #e74c3c;
-  --red-dim: #b03a2e;
-  --green:   #00ff88;
-  --cyan:    #00d4ff;
-  --gold:    #c9a84c;
-  --text:    #f0ece0;
-  --muted:   #adb3ba;
-  --ghost:   #333;
-  --mono: 'Courier Prime', monospace;
-  --sans: 'Oswald', sans-serif;
-}
-html,body {
-  height:100%; overflow:hidden;
-  background:var(--bg); color:var(--text);
-  font-family:var(--sans);
-  touch-action:manipulation;
-  overscroll-behavior:none;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SHADE - Final Disarm</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; touch-action: manipulation; }
+    body {
+      font-family: 'Oswald', sans-serif;
+      max-width: 420px;
+      margin: 0 auto;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 24px;
+    }
 
-/* ══ SCREENS ══ */
-.screen { display:none; position:fixed; inset:0; flex-direction:column; }
-.screen.active { display:flex; }
+    /* LOGIN SCREEN */
+    .login-screen {
+      text-align: center;
+      width: 100%;
+      opacity: 1;
+      transition: opacity 0.3s;
+    }
 
-/* ══ CANVAS BG ══ */
-#bg-canvas {
-  position:fixed; inset:0;
-  pointer-events:none;
-  z-index:0;
-  opacity:0.35;
-}
+    .login-screen.hidden {
+      display: none;
+      opacity: 0;
+    }
 
-/* ══════════════════════════════
-   SCREEN A — LOGIN
-══════════════════════════════ */
-#screen-login {
-  align-items:center;
-  justify-content:center;
-  z-index:10;
-  padding:40px 24px;
-  padding-top: max(40px, env(safe-area-inset-top, 40px));
-  padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
-}
-.login-card {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:24px;
-  width:100%;
-  max-width:400px;
-}
-.login-seal {
-  width:110px; height:110px;
-  object-fit:contain;
-}
-.login-title {
-  font-size:13px; letter-spacing:0.3em;
-  font-family:var(--mono);
-  color:var(--gold); text-transform:uppercase;
-  text-align:center;
-}
-.login-heading {
-  font-size:32px; letter-spacing:0.2em;
-  text-align:center; color:var(--text);
-  text-transform:uppercase;
-}
-.login-sub {
-  font-family:var(--mono); font-size:12px;
-  letter-spacing:0.15em; color:var(--muted);
-  text-align:center; text-transform:uppercase;
-}
-.team-input {
-  width:100%;
-  background:#0d0f10;
-  border:1px solid #2c3035;
-  border-radius:3px;
-  font-family:var(--sans); font-size:22px; font-weight:600;
-  letter-spacing:0.2em;
-  color:var(--text); text-align:center;
-  padding:16px;
-  text-transform:uppercase;
-  caret-color:var(--cyan);
-}
-.team-input:focus { outline:none; border-color:var(--cyan); }
-.login-error {
-  font-family:var(--mono); font-size:12px;
-  color:var(--red); text-align:center;
-  letter-spacing:0.1em; min-height:18px;
-}
-.btn-login {
-  width:100%; padding:17px;
-  background:var(--cyan); color:#000;
-  border:none; border-radius:3px;
-  font-family:var(--sans); font-size:17px; font-weight:700;
-  letter-spacing:0.12em; text-transform:uppercase;
-  cursor:pointer; transition:background 0.12s;
-}
-.btn-login:hover { background:#00bde0; }
-.btn-login:active { background:#00a8cc; }
+    .login-screen h1 {
+      font-size: 36px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #f0ece0;
+      margin-bottom: 8px;
+    }
 
-/* ══════════════════════════════
-   SCREEN B — DISARM
-   Mobile: stacked column
-   Tablet/Desktop: two columns
-══════════════════════════════ */
-#screen-disarm {
-  z-index:10;
-  padding-top: max(0px, env(safe-area-inset-top, 0px));
-  padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
-  flex-direction: column;
-}
+    .login-screen p {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #c9a84c;
+      margin-bottom: 40px;
+    }
 
-/* Top strip */
-.disarm-topstrip {
-  flex-shrink:0;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:14px 24px;
-  border-bottom:1px solid #111;
-}
-.disarm-team-id {
-  font-family:var(--mono); font-size:11px;
-  letter-spacing:0.2em; color:var(--gold); text-transform:uppercase;
-}
-.disarm-status-dot {
-  width:7px; height:7px; border-radius:50%;
-  background:var(--green);
-  animation:pulse-dot 1.8s infinite;
-}
-@keyframes pulse-dot {
-  0%,100%{opacity:1;} 50%{opacity:0.3;}
-}
+    .team-select {
+      width: 100%;
+      padding: 12px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #f0ece0;
+      font-family: 'Oswald', sans-serif;
+      font-size: 14px;
+      border-radius: 2px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
 
-/* Content below topstrip — flex row on wide screens */
-.disarm-content {
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  min-height:0;
-}
+    .team-select:focus {
+      outline: none;
+      border-color: #c9a84c;
+    }
 
-/* Timer panel */
-.timer-panel {
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  padding:28px 24px 20px;
-  border-bottom:1px solid #111;
-}
+    .btn {
+      padding: 12px 32px;
+      background: transparent;
+      border: 1px solid #333;
+      color: #f0ece0;
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.15s;
+    }
 
-.timer-label {
-  font-family:var(--mono); font-size:9px;
-  letter-spacing:0.25em; color:#333; text-transform:uppercase;
-  margin-bottom:8px;
-}
-.timer-display {
-  font-family:var(--mono); font-size:clamp(40px, 10vw, 72px); font-weight:700;
-  color:var(--text); letter-spacing:0.04em; line-height:1;
-}
-.timer-display .timer-ms {
-  font-size:clamp(22px, 5vw, 40px); color:#444; vertical-align:baseline;
-}
-.timer-scan-line {
-  width:100%; height:1px;
-  background:linear-gradient(to right, transparent, #1a1a1a, transparent);
-  margin-top:16px;
-}
+    .btn:active {
+      border-color: #c9a84c;
+      color: #c9a84c;
+    }
 
-/* Code panel */
-.code-panel {
-  flex:1; display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  padding:24px 32px; gap:16px;
-}
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
 
-.code-instruction {
-  font-family:var(--mono); font-size:11px;
-  letter-spacing:0.2em; color:#444; text-transform:uppercase;
-}
-.code-boxes {
-  display:flex; gap:12px; justify-content:center;
-}
-.code-box {
-  width:clamp(52px, 12vw, 76px);
-  height:clamp(64px, 15vw, 92px);
-  background:#0a0c0e;
-  border:1px solid #222;
-  border-radius:4px;
-  display:flex; align-items:center; justify-content:center;
-  font-family:var(--mono);
-  font-size:clamp(28px, 7vw, 44px);
-  font-weight:700;
-  color:var(--cyan); letter-spacing:0;
-  transition:border-color 0.15s;
-}
-.code-box.active { border-color:var(--cyan); }
-.code-box.filled { border-color:#2c3035; }
-.code-box.error  { border-color:var(--red); color:var(--red); background:#100505; }
+    /* DISARM SCREEN */
+    .disarm-screen {
+      display: none;
+      text-align: center;
+      width: 100%;
+    }
 
-.code-hidden-input {
-  position:absolute; opacity:0; pointer-events:none;
-  width:1px; height:1px;
-}
+    .disarm-screen.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
 
-.lockout-bar-wrap {
-  width:100%; max-width:400px; height:4px;
-  background:#111; border-radius:2px; overflow:hidden;
-  display:none;
-}
-.lockout-bar {
-  height:100%; background:var(--red);
-  border-radius:2px;
-  transition:width linear;
-}
-.lockout-msg {
-  font-family:var(--mono); font-size:11px;
-  letter-spacing:0.15em; color:var(--red);
-  text-transform:uppercase; text-align:center;
-  min-height:16px;
-}
+    .team-name {
+      font-size: 14px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #c9a84c;
+    }
 
-.btn-disarm {
-  width:100%; max-width:400px; padding:17px;
-  background:transparent;
-  border:1px solid #333;
-  border-radius:3px;
-  font-family:var(--sans); font-size:17px; font-weight:700;
-  letter-spacing:0.15em; text-transform:uppercase;
-  color:#555; cursor:pointer;
-  transition:all 0.15s;
-}
-.btn-disarm.ready { border-color:var(--cyan); color:var(--cyan); }
-.btn-disarm.ready:hover { background:rgba(0,212,255,0.05); }
-.btn-disarm.ready:active { background:rgba(0,212,255,0.08); }
-.btn-disarm:disabled { opacity:0.3; cursor:not-allowed; }
+    .timer {
+      font-family: 'Courier Prime', monospace;
+      font-size: 48px;
+      font-weight: 700;
+      color: #f0ece0;
+      letter-spacing: 0.1em;
+    }
 
-/* ── WIDE LAYOUT (tablet/desktop landscape) ── */
-@media (min-width: 680px) {
-  #screen-disarm { flex-direction:column; }
+    .code-inputs {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 20px 0;
+    }
 
-  .disarm-content {
-    flex-direction:row;
-  }
+    .code-input {
+      width: 60px;
+      height: 60px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #f0ece0;
+      font-family: 'Courier Prime', monospace;
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      border-radius: 2px;
+      transition: all 0.15s;
+    }
 
-  .timer-panel {
-    flex:1;
-    border-bottom:none;
-    border-right:1px solid #111;
-    padding:40px;
-  }
+    .code-input:focus {
+      outline: none;
+      border-color: #c9a84c;
+      background: #252525;
+    }
 
-  .timer-display {
-    font-size:clamp(48px, 6vw, 80px);
-  }
+    .code-input.error {
+      border-color: #d32f2f;
+      background: #3a1a1a;
+    }
 
-  .code-panel {
-    flex:1;
-    padding:40px;
-    gap:20px;
-  }
+    .code-input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
-  .code-box {
-    width:clamp(60px, 8vw, 90px);
-    height:clamp(72px, 10vw, 110px);
-    font-size:clamp(32px, 5vw, 52px);
-  }
+    .lockout-bar {
+      width: 200px;
+      height: 4px;
+      background: #222;
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
 
-  .btn-disarm {
-    max-width:100%;
-  }
+    .lockout-fill {
+      height: 100%;
+      background: #d32f2f;
+      width: 0%;
+      transition: width 0.05s linear;
+    }
 
-  .lockout-bar-wrap {
-    max-width:100%;
-  }
-}
+    .submit-btn {
+      padding: 12px 48px;
+      background: transparent;
+      border: 1px solid #333;
+      color: #f0ece0;
+      font-family: 'Oswald', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.15s;
+      width: 100%;
+      max-width: 280px;
+    }
 
-/* ══════════════════════════════
-   SCREEN C — SUCCESS
-══════════════════════════════ */
-#screen-success {
-  align-items:center; justify-content:center;
-  z-index:10; background:#000;
-  padding:40px 32px;
-  gap:0;
-}
-.success-glow {
-  position:absolute; inset:0;
-  background:radial-gradient(ellipse at center, rgba(0,255,136,0.08) 0%, transparent 70%);
-  animation:success-pulse 2.5s ease-in-out infinite;
-}
-@keyframes success-pulse {
-  0%,100%{opacity:0.6;} 50%{opacity:1;}
-}
-.success-lines { display:flex; flex-direction:column; align-items:center; gap:18px; z-index:1; }
-.success-line {
-  font-family:var(--mono); text-align:center;
-  opacity:0; transform:translateY(10px);
-  animation:line-in 0.5s ease forwards;
-}
-@keyframes line-in {
-  to{opacity:1; transform:translateY(0);}
-}
-.s-small  { font-size:10px; letter-spacing:0.3em; color:#333; text-transform:uppercase; }
-.s-main   { font-size:28px; letter-spacing:0.2em; color:var(--green); font-weight:700; }
-.s-sub    { font-size:13px; letter-spacing:0.15em; color:var(--muted); text-transform:uppercase; }
-.s-team   { font-size:16px; letter-spacing:0.2em; color:var(--text); font-weight:600; }
-.s-detail { font-size:11px; letter-spacing:0.1em; color:#555; }
-.success-border {
-  position:absolute; inset:20px;
-  border:1px solid rgba(0,255,136,0.12);
-  border-radius:4px;
-  pointer-events:none;
-}
+    .submit-btn:active:not(:disabled) {
+      border-color: #c9a84c;
+      color: #c9a84c;
+    }
 
-/* ══════════════════════════════
-   CONNECTING OVERLAY
-══════════════════════════════ */
-.connecting-overlay {
-  position:fixed; inset:0; z-index:200;
-  background:#000;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  gap:20px; padding:40px;
-  opacity:0; pointer-events:none;
-  transition:opacity 0.3s;
-}
-.connecting-overlay.active { opacity:1; pointer-events:auto; }
-.connecting-seal { width:56px; height:56px; object-fit:contain; opacity:0.5; }
-.connecting-label {
-  font-family:var(--mono); font-size:10px;
-  letter-spacing:0.2em; color:var(--gold); text-transform:uppercase;
-  text-align:center;
-}
-.connecting-track {
-  width:100%; height:2px; background:#111; border-radius:2px; overflow:hidden;
-}
-.connecting-fill {
-  height:100%; width:0%; background:var(--cyan); border-radius:2px;
-  transition:width 0.4s ease;
-}
-.connecting-status {
-  font-family:var(--mono); font-size:11px;
-  letter-spacing:0.1em; color:#444; text-align:center;
-  min-height:16px;
-}
+    .submit-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
 
+    /* SUCCESS SCREEN */
+    .success-screen {
+      display: none;
+      text-align: center;
+      width: 100%;
+    }
 
-</style>
+    .success-screen.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .success-text {
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #c9a84c;
+      line-height: 1.6;
+    }
+
+    .success-text p {
+      margin: 8px 0;
+    }
+
+    .message {
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      color: #555;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 16px; }
+      .timer { font-size: 36px; }
+      .code-input { width: 50px; height: 50px; font-size: 18px; }
+    }
+  </style>
 </head>
 <body>
 
-<canvas id="bg-canvas"></canvas>
-
-<!-- ═════ SCREEN A — LOGIN ═════ -->
-<div class="screen active" id="screen-login">
-  <div class="login-card">
-    <img class="login-seal" src="assets/img/shade-seal.png" alt="SHADE">
-    <div class="login-title">SHADE · Secure Terminal</div>
-    <div class="login-heading">Final Disarm</div>
-    <div class="login-sub">Operative identification required</div>
-    <input class="team-input" id="team-input" type="text"
-           placeholder="TEAM 1"
-           oninput="this.value=this.value.toUpperCase()"
-           onkeydown="if(event.key==='Enter')attemptLogin()">
-    <div class="login-error" id="login-error"></div>
-    <button class="btn-login" onclick="attemptLogin()">Enter</button>
-  </div>
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <h1>SHADE</h1>
+  <p>Final Disarm Terminal</p>
+  <input type="text" class="team-select" id="teamInput" placeholder="Enter Team Name" autocomplete="off" style="text-transform: uppercase;">
+  <button class="btn" onclick="loginTeam()">Access Terminal</button>
+  <div class="message" id="loginMsg" style="color: #d32f2f;"></div>
 </div>
 
-<!-- ═════ SCREEN B — DISARM ═════ -->
-<div class="screen" id="screen-disarm">
-  <div class="disarm-topstrip">
-    <div class="disarm-team-id" id="disarm-team-label">TEAM —</div>
-    <div class="disarm-status-dot" id="status-dot"></div>
-  </div>
-
-  <div class="disarm-content">
-
-    <!-- LEFT / TOP: Timer -->
-    <div class="timer-panel">
-      <div class="timer-label">Universal Timer</div>
-      <div class="timer-display">
-        <span id="timer-main">00:00</span><span class="timer-ms">.<span id="timer-ms">000</span></span>
-      </div>
-      <div class="timer-scan-line"></div>
+<!-- DISARM -->
+<div class="disarm-screen" id="disarmScreen">
+  <div class="team-name" id="teamDisplay"></div>
+  <div class="timer" id="timerDisplay">00:00</div>
+  
+  <div>
+    <label style="font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.1em;">Enter Code</label>
+    <div class="code-inputs">
+      <input type="text" class="code-input" id="code0" maxlength="1" inputmode="numeric">
+      <input type="text" class="code-input" id="code1" maxlength="1" inputmode="numeric">
+      <input type="text" class="code-input" id="code2" maxlength="1" inputmode="numeric">
+      <input type="text" class="code-input" id="code3" maxlength="1" inputmode="numeric">
     </div>
-
-    <!-- RIGHT / BOTTOM: Code entry -->
-    <div class="code-panel">
-      <div class="code-instruction">Enter Disarm Code</div>
-
-      <div class="code-boxes" id="code-boxes" onclick="focusInput()">
-        <div class="code-box" id="cb0">_</div>
-        <div class="code-box" id="cb1">_</div>
-        <div class="code-box" id="cb2">_</div>
-        <div class="code-box" id="cb3">_</div>
-      </div>
-      <input class="code-hidden-input" id="code-hidden"
-             type="tel" maxlength="4" inputmode="numeric"
-             oninput="onCodeInput(this.value)"
-             onkeydown="onCodeKeydown(event)">
-
-      <div class="lockout-bar-wrap" id="lockout-bar-wrap">
-        <div class="lockout-bar" id="lockout-bar"></div>
-      </div>
-      <div class="lockout-msg" id="lockout-msg"></div>
-
-      <button class="btn-disarm" id="btn-disarm" onclick="submitCode()" disabled>
-        Disarm
-      </button>
+    <div class="lockout-bar" id="lockoutBar" style="display: none;">
+      <div class="lockout-fill" id="lockoutFill"></div>
     </div>
-
   </div>
+
+  <button class="submit-btn" id="submitBtn" onclick="submitCode()">Disarm</button>
+  <div class="message" id="errorMsg"></div>
 </div>
 
-<!-- ═════ SCREEN C — SUCCESS ═════ -->
-<div class="screen" id="screen-success">
-  <div class="success-glow"></div>
-  <div class="success-border"></div>
-  <div class="success-lines" id="success-lines"></div>
-</div>
-
-<!-- CONNECTING OVERLAY -->
-<div class="connecting-overlay" id="connecting-overlay">
-  <img class="connecting-seal" src="assets/img/shade-seal.png" alt="SHADE">
-  <div class="connecting-label">Establishing secure link</div>
-  <div class="connecting-track">
-    <div class="connecting-fill" id="con-fill"></div>
+<!-- SUCCESS -->
+<div class="success-screen" id="successScreen">
+  <div class="success-text">
+    <p>ACCESS GRANTED</p>
+    <p>DEVICE DISARMED</p>
   </div>
-  <div class="connecting-status" id="con-status">Authenticating...</div>
+  <div class="message">Mission complete</div>
 </div>
 
-<!-- Firebase -->
-<script src="assets/js/firebase-config.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-/* ═══════════════════════════════════════
-   FIREBASE INIT
-═══════════════════════════════════════ */
-firebase.initializeApp(SHADE_FIREBASE_CONFIG);
-const db         = firebase.database();
-const sessionRef = db.ref('shade/session');
-const teamsRef   = db.ref('shade/teams');
+const TEAMS = ['TEAM 1', 'TEAM 2', 'TEAM 3', 'TEAM 4', 'TEAM 5', 'TEAM 6', 'TEAM 7', 'TEAM 8', 'TEAM 9', 'TEAM 10', 'TEAM 11', 'TEAM 12'];
+let gameState = null;
+let currentTeam = null;
+let timerInterval = null;
+let lockoutEnd = 0;
 
-/* ═══════════════════════════════════════
-   STATE
-═══════════════════════════════════════ */
-let session  = {};
-let myTeam   = null;   // team name string e.g. "TEAM 3"
-let teamData = {};
-let timerInterval  = null;
-let lockoutInterval = null;
-let codeBuffer = '';
+// Get admin state from localStorage (shared)
+function getAdminState() {
+  const saved = localStorage.getItem('shade-admin');
+  return saved ? JSON.parse(saved) : null;
+}
 
-/* ═══════════════════════════════════════
-   CANVAS BACKGROUND — COVERT TECH
-═══════════════════════════════════════ */
-(function initCanvas() {
-  const canvas = document.getElementById('bg-canvas');
-  const ctx    = canvas.getContext('2d');
-  const CHARS  = '0123456789ABCDEF:./\\|[]{}%$#@!?';
-  let cols, drops, fontSize = 13;
-
-  function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-    cols  = Math.floor(canvas.width / fontSize);
-    drops = Array(cols).fill(1);
+function loginTeam() {
+  const teamInput = document.getElementById('teamInput');
+  const team = teamInput.value.trim().toUpperCase();
+  const msgEl = document.getElementById('loginMsg');
+  
+  if (!team) {
+    msgEl.textContent = 'Enter your team name';
+    return;
   }
-  resize();
-  window.addEventListener('resize', resize);
 
-  function draw() {
-    ctx.fillStyle = 'rgba(0,0,0,0.06)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = fontSize + 'px Courier Prime, monospace';
-    for (let i = 0; i < drops.length; i++) {
-      const c = CHARS[Math.floor(Math.random() * CHARS.length)];
-      // Vary colour: mostly very dark, occasional brighter
-      const bright = Math.random() < 0.02;
-      ctx.fillStyle = bright ? 'rgba(0,212,255,0.5)' : 'rgba(0,212,255,0.07)';
-      ctx.fillText(c, i * fontSize, drops[i] * fontSize);
-      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-      drops[i]++;
+  if (!TEAMS.includes(team)) {
+    msgEl.textContent = 'Invalid team name. Try: TEAM 1, TEAM 2, etc.';
+    return;
+  }
+
+  const state = getAdminState();
+  if (!state || !state.enabledTeams.includes(team)) {
+    msgEl.textContent = 'Team not enabled for this session';
+    return;
+  }
+
+  currentTeam = team;
+  localStorage.setItem('shade-current-team', team);
+  
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('disarmScreen').classList.add('active');
+  document.getElementById('teamDisplay').textContent = team;
+  
+  startTimerUpdate();
+  document.getElementById('code0').focus();
+}
+
+function startTimerUpdate() {
+  const update = () => {
+    const state = getAdminState();
+    if (state && state.timerRunning) {
+      const elapsed = Math.floor((Date.now() - state.timerStart) / 1000);
+      const mins = Math.floor(elapsed / 60);
+      const secs = elapsed % 60;
+      document.getElementById('timerDisplay').textContent = 
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
-  }
-  setInterval(draw, 80);
-})();
+    requestAnimationFrame(update);
+  };
+  update();
+}
 
-/* ═══════════════════════════════════════
-   FIREBASE LISTENERS
-═══════════════════════════════════════ */
-sessionRef.on('value', snap => {
-  session = snap.val() || {};
-  if (session.isRunning && !session.isPaused && !timerInterval) startTick();
-  if (session.isPaused || !session.isRunning) stopTick();
+// Code input handling
+['code0', 'code1', 'code2', 'code3'].forEach((id, idx) => {
+  const input = document.getElementById(id);
+  input.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '');
+    if (e.target.value && idx < 3) {
+      document.getElementById(`code${idx + 1}`).focus();
+    }
+  });
+  
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+      document.getElementById(`code${idx - 1}`).focus();
+    }
+  });
 });
 
-/* ═══════════════════════════════════════
-   TIMER
-═══════════════════════════════════════ */
-function startTick() {
-  clearInterval(timerInterval);
-  timerInterval = setInterval(tickTimer, 50);
-}
-function stopTick() {
-  clearInterval(timerInterval);
-  timerInterval = null;
-}
-function tickTimer() {
-  if (!session.isRunning || !session.startedAt) return;
-  const elapsed = session.isPaused
-    ? (session.pausedElapsed || 0)
-    : Date.now() - session.startedAt;
-  const totalSec = Math.floor(elapsed / 1000);
-  const m = Math.floor(totalSec / 60).toString().padStart(2,'0');
-  const s = (totalSec % 60).toString().padStart(2,'0');
-  const ms = (elapsed % 1000).toString().padStart(3,'0');
-  document.getElementById('timer-main').textContent = `${m}:${s}`;
-  document.getElementById('timer-ms').textContent   = ms;
+function getCode() {
+  return ['code0', 'code1', 'code2', 'code3']
+    .map(id => document.getElementById(id).value)
+    .join('');
 }
 
-/* ═══════════════════════════════════════
-   LOGIN
-═══════════════════════════════════════ */
-function attemptLogin() {
-  const val = document.getElementById('team-input').value.trim().toUpperCase();
-  const errEl = document.getElementById('login-error');
-  errEl.textContent = '';
-
-  if (!val) { errEl.textContent = 'Enter your team designation'; return; }
-
-  const key = val.replace(/ /g,'_');
-  teamsRef.child(key).once('value').then(snap => {
-    const t = snap.val();
-    if (!t || !t.enabled) {
-      errEl.textContent = 'Team not recognised or not active';
-      return;
-    }
-    if (t.completed) {
-      errEl.textContent = 'This team has already disarmed the device';
-      return;
-    }
-
-    myTeam   = val;
-    teamData = t;
-    teamsRef.child(key).update({ loggedIn: true });
-    showConnecting(() => enterDisarmScreen());
-  });
-}
-
-/* ═══════════════════════════════════════
-   CONNECTING ANIMATION
-═══════════════════════════════════════ */
-function showConnecting(onComplete) {
-  const ov   = document.getElementById('connecting-overlay');
-  const fill = document.getElementById('con-fill');
-  const stat = document.getElementById('con-status');
-  ov.classList.add('active');
-  const steps = [
-    { pct:25,  text:'Authenticating operative...',   ms:0    },
-    { pct:55,  text:'Routing secure channel...',     ms:700  },
-    { pct:80,  text:'Decrypting mission data...',    ms:1400 },
-    { pct:100, text:'Connection established',        ms:2000 },
-  ];
-  steps.forEach(({pct,text,ms}) => setTimeout(() => {
-    fill.style.width = pct+'%'; stat.textContent = text;
-  }, ms));
-  setTimeout(() => { ov.classList.remove('active'); onComplete(); }, 2800);
-}
-
-/* ═══════════════════════════════════════
-   DISARM SCREEN
-═══════════════════════════════════════ */
-function enterDisarmScreen() {
-  showScreen('screen-disarm');
-  document.getElementById('disarm-team-label').textContent = myTeam;
-
-  // Listen to this team's state
-  const key = myTeam.replace(/ /g,'_');
-  teamsRef.child(key).on('value', snap => {
-    teamData = snap.val() || {};
-    if (teamData.completed) {
-      setTimeout(showSuccessScreen, 400);
-    }
-    checkLockout();
-  });
-
-  focusInput();
-}
-
-function focusInput() {
-  const inp = document.getElementById('code-hidden');
-  inp.removeAttribute('readonly');
-  inp.focus();
-}
-
-/* ── CODE INPUT ── */
-function onCodeInput(val) {
-  // strip non-digits
-  val = val.replace(/\D/g,'').slice(0,4);
-  document.getElementById('code-hidden').value = val;
-  codeBuffer = val;
-  renderBoxes(val, false);
-  document.getElementById('btn-disarm').className =
-    val.length === 4 ? 'btn-disarm ready' : 'btn-disarm';
-  document.getElementById('btn-disarm').disabled = val.length !== 4;
-}
-
-function onCodeKeydown(e) {
-  if (e.key === 'Enter' && codeBuffer.length === 4) submitCode();
-}
-
-function renderBoxes(val, isError) {
-  for (let i = 0; i < 4; i++) {
-    const box = document.getElementById('cb'+i);
-    const ch  = val[i];
-    box.textContent = ch || '_';
-    box.className = 'code-box';
-    if (isError)   box.classList.add('error');
-    else if (ch)   box.classList.add('filled');
-    else if (i===val.length) box.classList.add('active');
-  }
-}
-
-/* ── SUBMIT ── */
 function submitCode() {
-  if (isLockedOut()) return;
-  if (codeBuffer.length !== 4) return;
+  if (lockoutEnd > Date.now()) return;
 
-  const correct = codeBuffer === (session.code || '');
-  if (correct) {
-    handleSuccess();
+  const code = getCode();
+  const state = getAdminState();
+  
+  if (!state || code.length !== 4) {
+    return;
+  }
+
+  if (code === state.code) {
+    // Correct!
+    document.getElementById('disarmScreen').classList.remove('active');
+    document.getElementById('successScreen').classList.add('active');
+    
+    // Mark completed in state
+    state.teams[currentTeam].completed = true;
+    localStorage.setItem('shade-admin', JSON.stringify(state));
   } else {
-    handleWrongCode();
+    // Wrong!
+    ['code0', 'code1', 'code2', 'code3'].forEach(id => {
+      document.getElementById(id).classList.add('error');
+      document.getElementById(id).disabled = true;
+    });
+    
+    lockoutEnd = Date.now() + 10000;
+    document.getElementById('lockoutBar').style.display = 'block';
+    
+    const lockout = () => {
+      if (lockoutEnd > Date.now()) {
+        const remaining = lockoutEnd - Date.now();
+        const pct = (remaining / 10000) * 100;
+        document.getElementById('lockoutFill').style.width = pct + '%';
+        requestAnimationFrame(lockout);
+      } else {
+        ['code0', 'code1', 'code2', 'code3'].forEach(id => {
+          document.getElementById(id).classList.remove('error');
+          document.getElementById(id).disabled = false;
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('lockoutBar').style.display = 'none';
+        document.getElementById('code0').focus();
+      }
+    };
+    lockout();
   }
 }
 
-function handleSuccess() {
-  const key = myTeam.replace(/ /g,'_');
-  const elapsed = session.startedAt
-    ? Date.now() - session.startedAt
-    : 0;
-  const hints = teamData.hintsUsed || 0;
-  const wrong = teamData.wrongAttempts || 0;
-  const adjMs = elapsed + hints*60000 + wrong*30000;
-
-  teamsRef.child(key).update({
-    completed:           true,
-    completedAt:         Date.now(),
-    adjustedCompletionMs: adjMs
-  });
-  stopTick();
-  showSuccessScreen();
-}
-
-function handleWrongCode() {
-  const key = myTeam.replace(/ /g,'_');
-  const wrong = (teamData.wrongAttempts||0) + 1;
-  const lockUntil = Date.now() + 10000;
-
-  teamsRef.child(key).update({ wrongAttempts:wrong, lockoutUntil:lockUntil });
-
-  renderBoxes(codeBuffer, true);
-  startLockout(10000);
-
-  // Clear input
-  setTimeout(() => {
-    codeBuffer = '';
-    document.getElementById('code-hidden').value = '';
-    renderBoxes('', false);
-    document.getElementById('btn-disarm').disabled = true;
-    document.getElementById('btn-disarm').className = 'btn-disarm';
-  }, 600);
-}
-
-/* ── LOCKOUT ── */
-function isLockedOut() {
-  return teamData.lockoutUntil && Date.now() < teamData.lockoutUntil;
-}
-
-function checkLockout() {
-  if (isLockedOut()) {
-    const remaining = teamData.lockoutUntil - Date.now();
-    startLockout(remaining);
+// Check if already logged in
+const saved = localStorage.getItem('shade-current-team');
+if (saved && TEAMS.includes(saved)) {
+  const state = getAdminState();
+  if (state && state.enabledTeams.includes(saved)) {
+    currentTeam = saved;
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('disarmScreen').classList.add('active');
+    document.getElementById('teamDisplay').textContent = saved;
+    startTimerUpdate();
   }
 }
 
-function startLockout(durationMs) {
-  clearInterval(lockoutInterval);
-  const inp  = document.getElementById('code-hidden');
-  const btn  = document.getElementById('btn-disarm');
-  const bar  = document.getElementById('lockout-bar');
-  const wrap = document.getElementById('lockout-bar-wrap');
-  const msg  = document.getElementById('lockout-msg');
-
-  inp.setAttribute('readonly','');
-  btn.disabled = true;
-  wrap.style.display = 'block';
-  bar.style.transition = 'none';
-  bar.style.width = '100%';
-
-  const endTime = Date.now() + durationMs;
-
-  setTimeout(() => {
-    bar.style.transition = `width ${durationMs}ms linear`;
-    bar.style.width = '0%';
-  }, 30);
-
-  lockoutInterval = setInterval(() => {
-    const rem = endTime - Date.now();
-    if (rem <= 0) {
-      clearInterval(lockoutInterval);
-      inp.removeAttribute('readonly');
-      wrap.style.display = 'none';
-      bar.style.width = '100%';
-      msg.textContent = '';
-      inp.focus();
-    } else {
-      msg.textContent = `Locked — ${Math.ceil(rem/1000)}s`;
-    }
-  }, 100);
-}
-
-/* ═══════════════════════════════════════
-   SUCCESS SCREEN
-═══════════════════════════════════════ */
-function showSuccessScreen() {
-  showScreen('screen-success');
-  stopTick();
-
-  const lines = [
-    { cls:'s-small',  text:'SHADE · Secure Terminal',    delay:200  },
-    { cls:'s-main',   text:'DEVICE DISARMED',             delay:600  },
-    { cls:'s-sub',    text:'Transmission Secured',        delay:1000 },
-    { cls:'s-team',   text:myTeam,                        delay:1400 },
-    { cls:'s-detail', text:'Await debrief confirmation',  delay:2000 },
-  ];
-
-  const container = document.getElementById('success-lines');
-  container.innerHTML = '';
-
-  lines.forEach(({ cls, text, delay }) => {
-    const el = document.createElement('div');
-    el.className = `success-line ${cls}`;
-    el.textContent = text;
-    el.style.animationDelay = delay + 'ms';
-    container.appendChild(el);
+// Enter key on login
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('teamInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') loginTeam();
   });
-}
-
-/* ═══════════════════════════════════════
-   HELPERS
-═══════════════════════════════════════ */
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-// Restore session on refresh
-(function restoreSession() {
-  const saved = sessionStorage.getItem('shade_team');
-  if (!saved) return;
-  const key = saved.replace(/ /g,'_');
-  teamsRef.child(key).once('value').then(snap => {
-    const t = snap.val();
-    if (!t || !t.enabled) { sessionStorage.removeItem('shade_team'); return; }
-    myTeam   = saved;
-    teamData = t;
-    if (t.completed) {
-      showScreen('screen-success');
-      showSuccessScreen();
-    } else {
-      enterDisarmScreen();
-    }
-  });
-})();
-
-// Save team to sessionStorage on login
-const _origEnter = enterDisarmScreen;
-function enterDisarmScreen() {
-  sessionStorage.setItem('shade_team', myTeam);
-  _origEnter();
-}
+});
 </script>
+
 </body>
 </html>
