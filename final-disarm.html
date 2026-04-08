@@ -352,7 +352,10 @@ function enterDisarm() {
   teamListener = TR.child(k).on('value', snap => {
     teamData = snap.val()||{};
     if (teamData.completed) { stopTick(); showSuccess(); return; }
-    if (teamData.lockoutUntil && Date.now()<teamData.lockoutUntil) applyLockout(teamData.lockoutUntil-Date.now());
+    // Only re-apply lockout if remaining time is meaningful (>500ms)
+    // — avoids near-expired Firebase re-fires resetting boxes to green prematurely
+    const rem = teamData.lockoutUntil ? teamData.lockoutUntil - Date.now() : 0;
+    if (rem > 500) applyLockout(rem);
   });
   if (S.isRunning) startTick();
   setTimeout(focusCode, 300);
@@ -389,22 +392,23 @@ function renderBoxes(v,err) {
 function submitCode() {
   if(codeBuf.length!==4||isLocked()) return;
   if(codeBuf===(S.code||'')) {
-    const master=S.startedAt?Date.now()-S.startedAt:0;
-    const adj=master+(teamData.hintsUsed||0)*60000+(teamData.wrongAttempts||0)*30000;
+    const master = S.startedAt ? Date.now()-S.startedAt : 0;
+    const adj    = master + (teamData.hintsUsed||0)*60000 + (teamData.wrongAttempts||0)*30000;
+    // Write to Firebase — the team listener will detect completed:true and call showSuccess() once
     TR.child(key(myTeam)).update({ completed:true, completedAt:Date.now(), adjustedCompletionMs:adj });
-    stopTick(); showSuccess();
+    stopTick();
   } else {
-    const wrong=(teamData.wrongAttempts||0)+1;
+    const wrong = (teamData.wrongAttempts||0)+1;
     TR.child(key(myTeam)).update({ wrongAttempts:wrong, lockoutUntil:Date.now()+10000 });
-    renderBoxes(codeBuf,true);
+    renderBoxes(codeBuf, true);
     applyLockout(10000);
-    // Clear buffer and input but keep boxes locked-red — applyLockout handles the reset on expiry
+    // Clear buffer only — boxes stay locked-red until applyLockout expiry
     setTimeout(()=>{
       codeBuf='';
       document.getElementById('code-hidden').value='';
       document.getElementById('btn-disarm').disabled=true;
       document.getElementById('btn-disarm').className='btn-disarm';
-    },700);
+    }, 700);
   }
 }
 
