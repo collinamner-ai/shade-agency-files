@@ -104,9 +104,10 @@ html, body {
   font-family:var(--mono); font-size:clamp(30px,8vw,44px); font-weight:700;
   color:#fff; transition:all 0.1s;
 }
-.d-box.cursor { border-color:var(--red); color:var(--red); }
-.d-box.filled { border-color:#2a2a2a; color:#fff; }
+.d-box.cursor { border-color:var(--green); color:var(--green); background:#001a0a; }
+.d-box.filled { border-color:#1a3a24; color:var(--green); background:#001208; }
 .d-box.error  { border-color:var(--red); color:var(--red); background:#120000; }
+.d-box.locked { border-color:var(--red-dim); color:#330000; background:#0d0000; }
 .d-hidden { position:absolute; opacity:0; pointer-events:none; width:1px; height:1px; }
 
 .d-lockbar-wrap { width:100%; max-width:380px; height:4px; background:#111; border-radius:2px; overflow:hidden; display:none; }
@@ -147,16 +148,20 @@ html, body {
 .s-time  { font-size:22px; font-weight:700; letter-spacing:0.06em; color:var(--green); font-family:var(--mono); }
 .s-note  { font-size:10px; letter-spacing:0.1em; color:#222; }
 
-/* Next team button — appears after success */
-.btn-next-team {
-  margin-top:12px; padding:15px 36px;
+/* Close button on success screen */
+.btn-close-success {
+  margin-top:16px; padding:16px 48px;
   background:transparent; border:1.5px solid #2a2a2a;
   border-radius:3px; font-family:var(--sans); font-size:15px; font-weight:700;
-  letter-spacing:0.1em; text-transform:uppercase; color:#444;
+  letter-spacing:0.1em; text-transform:uppercase; color:#555;
   cursor:pointer; transition:all 0.15s;
   opacity:0; animation:fup 0.5s ease forwards;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
 }
-.btn-next-team:hover { border-color:var(--red); color:var(--red); }
+.btn-close-success:hover { border-color:#555; color:#888; }
+.btn-close-countdown {
+  font-size:10px; letter-spacing:0.15em; color:#333; font-weight:400;
+}
 
 /* ═══ CONNECTING ═══ */
 .con-overlay {
@@ -404,55 +409,90 @@ function applyLockout(dur) {
         wrap=document.getElementById('lockbar-wrap'), bar=document.getElementById('lockbar'),
         msg=document.getElementById('lockmsg');
   inp.setAttribute('readonly',''); btn.disabled=true;
+  // Turn all boxes red/locked
+  for(let i=0;i<4;i++){
+    const b=document.getElementById('db'+i);
+    b.className='d-box locked';
+  }
   wrap.style.display='block'; bar.style.transition='none'; bar.style.width='100%';
   setTimeout(()=>{ bar.style.transition='width '+dur+'ms linear'; bar.style.width='0%'; },40);
   const end=Date.now()+dur;
   lockInt=setInterval(()=>{
     const rem=end-Date.now();
-    if(rem<=0){ clearInterval(lockInt); inp.removeAttribute('readonly'); wrap.style.display='none'; bar.style.width='100%'; msg.textContent=''; inp.focus(); }
-    else { msg.textContent='INPUT LOCKED — '+Math.ceil(rem/1000)+'s'; }
+    if(rem<=0){
+      clearInterval(lockInt); inp.removeAttribute('readonly');
+      wrap.style.display='none'; bar.style.width='100%'; msg.textContent='';
+      // Reset boxes back to green
+      codeBuf=''; document.getElementById('code-hidden').value='';
+      renderBoxes('',false);
+      document.getElementById('btn-disarm').disabled=true;
+      document.getElementById('btn-disarm').className='btn-disarm';
+      inp.focus();
+    } else { msg.textContent='INPUT LOCKED — '+Math.ceil(rem/1000)+'s'; }
   },100);
 }
 
-/* ── SUCCESS — shows time, then "Next Team" button to reset ── */
+/* ── SUCCESS ── */
 function showSuccess() {
   showScreen('s-success');
 
-  // Detach team listener — this team is done
   if (myTeam && teamListener) {
     TR.child(key(myTeam)).off('value', teamListener);
     teamListener = null;
   }
 
-  const adjMs = teamData.adjustedCompletionMs || 0;
+  const adjMs        = teamData.adjustedCompletionMs || 0;
   const completedName = myTeam;
 
   const lines = [
-    {cls:'s-micro', text:'Operation Blackout · Final Phase',     delay:100 },
-    {cls:'s-main',  text:'Mission Complete',                     delay:500 },
-    {cls:'s-sub',   text:'Device Successfully Disarmed',         delay:1000},
-    {cls:'s-team',  text:completedName,                          delay:1500},
-    {cls:'s-time',  text:fmtFull(adjMs),                         delay:2000},
-    {cls:'s-note',  text:'Time logged — stand by for debrief',   delay:2800},
+    {cls:'s-micro', text:'Operation Blackout · Final Phase',   delay:100 },
+    {cls:'s-main',  text:'Mission Complete',                   delay:500 },
+    {cls:'s-sub',   text:'Device Successfully Disarmed',       delay:1000},
+    {cls:'s-team',  text:completedName,                        delay:1500},
+    {cls:'s-time',  text:fmtFull(adjMs),                       delay:2000},
+    {cls:'s-note',  text:'Time logged — stand by for debrief', delay:2800},
   ];
 
   const c = document.getElementById('success-inner');
   c.innerHTML = '';
   lines.forEach(({cls,text,delay}) => {
-    const el=document.createElement('div');
-    el.className='s-line '+cls;
-    el.textContent=text;
-    el.style.animationDelay=delay+'ms';
+    const el = document.createElement('div');
+    el.className = 's-line '+cls;
+    el.textContent = text;
+    el.style.animationDelay = delay+'ms';
     c.appendChild(el);
   });
 
-  // "Next Team" button appears after 4 seconds
+  // Close button appears after 4 seconds with 10s auto-return countdown
+  let autoTimer = null;
+  let countdownTick = null;
+
   setTimeout(() => {
     const btn = document.createElement('button');
-    btn.className = 'btn-next-team';
-    btn.textContent = '▶ Next Team';
-    btn.style.animationDelay = '0ms';
-    btn.onclick = resetForNextTeam;
+    btn.className = 'btn-close-success';
+    btn.innerHTML = 'Close<span class="btn-close-countdown" id="close-countdown">Auto-returning in 10s</span>';
+
+    let remaining = 10;
+
+    const doClose = () => {
+      clearTimeout(autoTimer);
+      clearInterval(countdownTick);
+      resetForNextTeam();
+    };
+
+    btn.onclick = doClose;
+
+    countdownTick = setInterval(() => {
+      remaining--;
+      const cd = document.getElementById('close-countdown');
+      if (cd) cd.textContent = remaining > 0 ? 'Auto-returning in '+remaining+'s' : '';
+      if (remaining <= 0) {
+        clearInterval(countdownTick);
+      }
+    }, 1000);
+
+    autoTimer = setTimeout(doClose, 10000);
+
     c.appendChild(btn);
   }, 4000);
 }
