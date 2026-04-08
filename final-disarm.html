@@ -1,1 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SHADE — Final Disarm</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --bg:      #000;
+  --surface: #080a0b;
+  --red:     #e74c3c;
+  --red-dim: #b03a2e;
+  --green:   #00ff88;
+  --cyan:    #00d4ff;
+  --gold:    #c9a84c;
+  --text:    #f0ece0;
+  --muted:   #adb3ba;
+  --ghost:   #333;
+  --mono: 'Courier Prime', monospace;
+  --sans: 'Oswald', sans-serif;
+}
+html,body {
+  height:100%; overflow:hidden;
+  background:var(--bg); color:var(--text);
+  font-family:var(--sans);
+  touch-action:manipulation;
+  overscroll-behavior:none;
+}
 
+/* ══ SCREENS ══ */
+.screen { display:none; position:fixed; inset:0; flex-direction:column; }
+.screen.active { display:flex; }
+
+/* ══ CANVAS BG ══ */
+#bg-canvas {
+  position:fixed; inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:0.35;
+}
+
+/* ══════════════════════════════
+   SCREEN A — LOGIN
+══════════════════════════════ */
+#screen-login {
+  align-items:center;
+  justify-content:center;
+  z-index:10;
+  padding:40px 32px;
+  padding-top: max(40px, env(safe-area-inset-top, 40px));
+  padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
+  gap:28px;
+}
+.login-seal {
+  width:120px; height:120px;
+  object-fit:contain;
+}
+.login-title {
+  font-size:13px; letter-spacing:0.3em;
+  font-family:var(--mono);
+  color:var(--gold); text-transform:uppercase;
+  text-align:center;
+}
+.login-heading {
+  font-size:32px; letter-spacing:0.2em;
+  text-align:center; color:var(--text);
+  text-transform:uppercase;
+}
+.login-sub {
+  font-family:var(--mono); font-size:12px;
+  letter-spacing:0.15em; color:var(--muted);
+  text-align:center; text-transform:uppercase;
+}
+.team-input {
+  width:100%;
+  background:#0d0f10;
+  border:1px solid #2c3035;
+  border-radius:3px;
+  font-family:var(--sans); font-size:22px; font-weight:600;
+  letter-spacing:0.2em;
+  color:var(--text); text-align:center;
+  padding:16px;
+  text-transform:uppercase;
+  caret-color:var(--cyan);
+}
+.team-input:focus { outline:none; border-color:var(--cyan); }
+.login-error {
+  font-family:var(--mono); font-size:12px;
+  color:var(--red); text-align:center;
+  letter-spacing:0.1em; min-height:18px;
+}
+.btn-login {
+  width:100%; padding:17px;
+  background:var(--cyan); color:#000;
+  border:none; border-radius:3px;
+  font-family:var(--sans); font-size:17px; font-weight:700;
+  letter-spacing:0.12em; text-transform:uppercase;
+  cursor:pointer; transition:background 0.12s;
+}
+.btn-login:active { background:#00a8cc; }
+
+/* ══════════════════════════════
+   SCREEN B — DISARM
+══════════════════════════════ */
+#screen-disarm {
+  z-index:10;
+  padding-top: max(20px, env(safe-area-inset-top, 20px));
+  padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
+}
+
+/* Top strip */
+.disarm-topstrip {
+  flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px 12px;
+  border-bottom:1px solid #111;
+}
+.disarm-team-id {
+  font-family:var(--mono); font-size:10px;
+  letter-spacing:0.2em; color:var(--gold); text-transform:uppercase;
+}
+.disarm-status-dot {
+  width:7px; height:7px; border-radius:50%;
+  background:var(--green);
+  animation:pulse-dot 1.8s infinite;
+}
+@keyframes pulse-dot {
+  0%,100%{opacity:1;} 50%{opacity:0.3;}
+}
+
+/* Universal Timer — THE CENTREPIECE */
+.timer-block {
+  flex-shrink:0;
+  display:flex; flex-direction:column;
+  align-items:center; padding:20px 20px 16px;
+}
+.timer-label {
+  font-family:var(--mono); font-size:9px;
+  letter-spacing:0.25em; color:#333; text-transform:uppercase;
+  margin-bottom:6px;
+}
+.timer-display {
+  font-family:var(--mono); font-size:52px; font-weight:700;
+  color:var(--text); letter-spacing:0.04em;
+  line-height:1;
+  text-shadow:0 0 30px rgba(240,236,224,0.08);
+}
+.timer-display .timer-ms {
+  font-size:28px; color:#555; vertical-align:baseline;
+}
+.timer-scan-line {
+  width:100%; height:1px;
+  background:linear-gradient(to right, transparent, #1a1a1a, transparent);
+  margin-top:12px;
+}
+
+/* Code area */
+.code-area {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:0 28px; gap:16px;
+}
+.code-instruction {
+  font-family:var(--mono); font-size:11px;
+  letter-spacing:0.2em; color:#444; text-transform:uppercase;
+}
+.code-boxes {
+  display:flex; gap:12px; justify-content:center;
+}
+.code-box {
+  width:58px; height:72px;
+  background:#0a0c0e;
+  border:1px solid #222;
+  border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:36px; font-weight:700;
+  color:var(--cyan); letter-spacing:0;
+  transition:border-color 0.15s;
+}
+.code-box.active { border-color:var(--cyan); }
+.code-box.filled { border-color:#2c3035; }
+.code-box.error  { border-color:var(--red); color:var(--red); background:#100505; }
+
+/* Hidden real input */
+.code-hidden-input {
+  position:absolute; opacity:0; pointer-events:none;
+  width:1px; height:1px;
+}
+
+/* Lockout bar */
+.lockout-bar-wrap {
+  width:100%; height:4px;
+  background:#111; border-radius:2px; overflow:hidden;
+  display:none;
+}
+.lockout-bar {
+  height:100%; background:var(--red);
+  border-radius:2px;
+  transition:width linear;
+}
+.lockout-msg {
+  font-family:var(--mono); font-size:11px;
+  letter-spacing:0.15em; color:var(--red);
+  text-transform:uppercase; text-align:center;
+  min-height:16px;
+}
+
+/* Disarm button */
+.btn-disarm {
+  width:100%; padding:17px;
+  background:transparent;
+  border:1px solid #333;
+  border-radius:3px;
+  font-family:var(--sans); font-size:17px; font-weight:700;
+  letter-spacing:0.15em; text-transform:uppercase;
+  color:#555; cursor:pointer;
+  transition:all 0.15s;
+}
+.btn-disarm.ready {
+  border-color:var(--cyan); color:var(--cyan);
+}
+.btn-disarm.ready:active {
+  background:rgba(0,212,255,0.08);
+}
+.btn-disarm:disabled { opacity:0.3; cursor:not-allowed; }
+
+/* ══════════════════════════════
+   SCREEN C — SUCCESS
+══════════════════════════════ */
+#screen-success {
+  align-items:center; justify-content:center;
+  z-index:10; background:#000;
+  padding:40px 32px;
+  gap:0;
+}
+.success-glow {
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse at center, rgba(0,255,136,0.08) 0%, transparent 70%);
+  animation:success-pulse 2.5s ease-in-out infinite;
+}
+@keyframes success-pulse {
+  0%,100%{opacity:0.6;} 50%{opacity:1;}
+}
+.success-lines { display:flex; flex-direction:column; align-items:center; gap:18px; z-index:1; }
+.success-line {
+  font-family:var(--mono); text-align:center;
+  opacity:0; transform:translateY(10px);
+  animation:line-in 0.5s ease forwards;
+}
+@keyframes line-in {
+  to{opacity:1; transform:translateY(0);}
+}
+.s-small  { font-size:10px; letter-spacing:0.3em; color:#333; text-transform:uppercase; }
+.s-main   { font-size:28px; letter-spacing:0.2em; color:var(--green); font-weight:700; }
+.s-sub    { font-size:13px; letter-spacing:0.15em; color:var(--muted); text-transform:uppercase; }
+.s-team   { font-size:16px; letter-spacing:0.2em; color:var(--text); font-weight:600; }
+.s-detail { font-size:11px; letter-spacing:0.1em; color:#555; }
+.success-border {
+  position:absolute; inset:20px;
+  border:1px solid rgba(0,255,136,0.12);
+  border-radius:4px;
+  pointer-events:none;
+}
+
+/* ══════════════════════════════
+   CONNECTING OVERLAY
+══════════════════════════════ */
+.connecting-overlay {
+  position:fixed; inset:0; z-index:200;
+  background:#000;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:20px; padding:40px;
+  opacity:0; pointer-events:none;
+  transition:opacity 0.3s;
+}
+.connecting-overlay.active { opacity:1; pointer-events:auto; }
+.connecting-seal { width:56px; height:56px; object-fit:contain; opacity:0.5; }
+.connecting-label {
+  font-family:var(--mono); font-size:10px;
+  letter-spacing:0.2em; color:var(--gold); text-transform:uppercase;
+  text-align:center;
+}
+.connecting-track {
+  width:100%; height:2px; background:#111; border-radius:2px; overflow:hidden;
+}
+.connecting-fill {
+  height:100%; width:0%; background:var(--cyan); border-radius:2px;
+  transition:width 0.4s ease;
+}
+.connecting-status {
+  font-family:var(--mono); font-size:11px;
+  letter-spacing:0.1em; color:#444; text-align:center;
+  min-height:16px;
+}
+
+/* Portrait lock */
+@media screen and (orientation:landscape) {
+  body::after {
+    content:'Rotate device to portrait';
+    position:fixed; inset:0; background:#000;
+    color:var(--gold); font-family:var(--sans); font-size:18px;
+    letter-spacing:0.08em; text-align:center;
+    display:flex; align-items:center; justify-content:center;
+    z-index:9999; padding:40px;
+  }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- ═════ SCREEN A — LOGIN ═════ -->
+<div class="screen active" id="screen-login">
+  <img class="login-seal" src="assets/img/shade-seal.png" alt="SHADE">
+  <div class="login-title">SHADE · Secure Terminal</div>
+  <div class="login-heading">Final Disarm</div>
+  <div class="login-sub">Operative identification required</div>
+  <input class="team-input" id="team-input" type="text"
+         placeholder="TEAM 1"
+         oninput="this.value=this.value.toUpperCase()"
+         onkeydown="if(event.key==='Enter')attemptLogin()">
+  <div class="login-error" id="login-error"></div>
+  <button class="btn-login" onclick="attemptLogin()">Enter</button>
+</div>
+
+<!-- ═════ SCREEN B — DISARM ═════ -->
+<div class="screen" id="screen-disarm">
+  <div class="disarm-topstrip">
+    <div class="disarm-team-id" id="disarm-team-label">TEAM —</div>
+    <div class="disarm-status-dot" id="status-dot"></div>
+  </div>
+
+  <div class="timer-block">
+    <div class="timer-label">Universal Timer</div>
+    <div class="timer-display">
+      <span id="timer-main">00:00</span><span class="timer-ms">.<span id="timer-ms">000</span></span>
+    </div>
+    <div class="timer-scan-line"></div>
+  </div>
+
+  <div class="code-area">
+    <div class="code-instruction">Enter Disarm Code</div>
+
+    <div class="code-boxes" id="code-boxes" onclick="focusInput()">
+      <div class="code-box" id="cb0">_</div>
+      <div class="code-box" id="cb1">_</div>
+      <div class="code-box" id="cb2">_</div>
+      <div class="code-box" id="cb3">_</div>
+    </div>
+    <input class="code-hidden-input" id="code-hidden"
+           type="tel" maxlength="4" inputmode="numeric"
+           oninput="onCodeInput(this.value)"
+           onkeydown="onCodeKeydown(event)">
+
+    <div class="lockout-bar-wrap" id="lockout-bar-wrap">
+      <div class="lockout-bar" id="lockout-bar"></div>
+    </div>
+    <div class="lockout-msg" id="lockout-msg"></div>
+
+    <button class="btn-disarm" id="btn-disarm" onclick="submitCode()" disabled>
+      Disarm
+    </button>
+  </div>
+</div>
+
+<!-- ═════ SCREEN C — SUCCESS ═════ -->
+<div class="screen" id="screen-success">
+  <div class="success-glow"></div>
+  <div class="success-border"></div>
+  <div class="success-lines" id="success-lines"></div>
+</div>
+
+<!-- CONNECTING OVERLAY -->
+<div class="connecting-overlay" id="connecting-overlay">
+  <img class="connecting-seal" src="assets/img/shade-seal.png" alt="SHADE">
+  <div class="connecting-label">Establishing secure link</div>
+  <div class="connecting-track">
+    <div class="connecting-fill" id="con-fill"></div>
+  </div>
+  <div class="connecting-status" id="con-status">Authenticating...</div>
+</div>
+
+<!-- Firebase -->
+<script src="assets/js/firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+/* ═══════════════════════════════════════
+   FIREBASE INIT
+═══════════════════════════════════════ */
+firebase.initializeApp(SHADE_FIREBASE_CONFIG);
+const db         = firebase.database();
+const sessionRef = db.ref('shade/session');
+const teamsRef   = db.ref('shade/teams');
+
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let session  = {};
+let myTeam   = null;   // team name string e.g. "TEAM 3"
+let teamData = {};
+let timerInterval  = null;
+let lockoutInterval = null;
+let codeBuffer = '';
+
+/* ═══════════════════════════════════════
+   CANVAS BACKGROUND — COVERT TECH
+═══════════════════════════════════════ */
+(function initCanvas() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx    = canvas.getContext('2d');
+  const CHARS  = '0123456789ABCDEF:./\\|[]{}%$#@!?';
+  let cols, drops, fontSize = 13;
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    cols  = Math.floor(canvas.width / fontSize);
+    drops = Array(cols).fill(1);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function draw() {
+    ctx.fillStyle = 'rgba(0,0,0,0.06)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = fontSize + 'px Courier Prime, monospace';
+    for (let i = 0; i < drops.length; i++) {
+      const c = CHARS[Math.floor(Math.random() * CHARS.length)];
+      // Vary colour: mostly very dark, occasional brighter
+      const bright = Math.random() < 0.02;
+      ctx.fillStyle = bright ? 'rgba(0,212,255,0.5)' : 'rgba(0,212,255,0.07)';
+      ctx.fillText(c, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+  setInterval(draw, 80);
+})();
+
+/* ═══════════════════════════════════════
+   FIREBASE LISTENERS
+═══════════════════════════════════════ */
+sessionRef.on('value', snap => {
+  session = snap.val() || {};
+  if (session.isRunning && !session.isPaused && !timerInterval) startTick();
+  if (session.isPaused || !session.isRunning) stopTick();
+});
+
+/* ═══════════════════════════════════════
+   TIMER
+═══════════════════════════════════════ */
+function startTick() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(tickTimer, 50);
+}
+function stopTick() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+function tickTimer() {
+  if (!session.isRunning || !session.startedAt) return;
+  const elapsed = session.isPaused
+    ? (session.pausedElapsed || 0)
+    : Date.now() - session.startedAt;
+  const totalSec = Math.floor(elapsed / 1000);
+  const m = Math.floor(totalSec / 60).toString().padStart(2,'0');
+  const s = (totalSec % 60).toString().padStart(2,'0');
+  const ms = (elapsed % 1000).toString().padStart(3,'0');
+  document.getElementById('timer-main').textContent = `${m}:${s}`;
+  document.getElementById('timer-ms').textContent   = ms;
+}
+
+/* ═══════════════════════════════════════
+   LOGIN
+═══════════════════════════════════════ */
+function attemptLogin() {
+  const val = document.getElementById('team-input').value.trim().toUpperCase();
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+
+  if (!val) { errEl.textContent = 'Enter your team designation'; return; }
+
+  const key = val.replace(/ /g,'_');
+  teamsRef.child(key).once('value').then(snap => {
+    const t = snap.val();
+    if (!t || !t.enabled) {
+      errEl.textContent = 'Team not recognised or not active';
+      return;
+    }
+    if (t.completed) {
+      errEl.textContent = 'This team has already disarmed the device';
+      return;
+    }
+
+    myTeam   = val;
+    teamData = t;
+    teamsRef.child(key).update({ loggedIn: true });
+    showConnecting(() => enterDisarmScreen());
+  });
+}
+
+/* ═══════════════════════════════════════
+   CONNECTING ANIMATION
+═══════════════════════════════════════ */
+function showConnecting(onComplete) {
+  const ov   = document.getElementById('connecting-overlay');
+  const fill = document.getElementById('con-fill');
+  const stat = document.getElementById('con-status');
+  ov.classList.add('active');
+  const steps = [
+    { pct:25,  text:'Authenticating operative...',   ms:0    },
+    { pct:55,  text:'Routing secure channel...',     ms:700  },
+    { pct:80,  text:'Decrypting mission data...',    ms:1400 },
+    { pct:100, text:'Connection established',        ms:2000 },
+  ];
+  steps.forEach(({pct,text,ms}) => setTimeout(() => {
+    fill.style.width = pct+'%'; stat.textContent = text;
+  }, ms));
+  setTimeout(() => { ov.classList.remove('active'); onComplete(); }, 2800);
+}
+
+/* ═══════════════════════════════════════
+   DISARM SCREEN
+═══════════════════════════════════════ */
+function enterDisarmScreen() {
+  showScreen('screen-disarm');
+  document.getElementById('disarm-team-label').textContent = myTeam;
+
+  // Listen to this team's state
+  const key = myTeam.replace(/ /g,'_');
+  teamsRef.child(key).on('value', snap => {
+    teamData = snap.val() || {};
+    if (teamData.completed) {
+      setTimeout(showSuccessScreen, 400);
+    }
+    checkLockout();
+  });
+
+  focusInput();
+}
+
+function focusInput() {
+  const inp = document.getElementById('code-hidden');
+  inp.removeAttribute('readonly');
+  inp.focus();
+}
+
+/* ── CODE INPUT ── */
+function onCodeInput(val) {
+  // strip non-digits
+  val = val.replace(/\D/g,'').slice(0,4);
+  document.getElementById('code-hidden').value = val;
+  codeBuffer = val;
+  renderBoxes(val, false);
+  document.getElementById('btn-disarm').className =
+    val.length === 4 ? 'btn-disarm ready' : 'btn-disarm';
+  document.getElementById('btn-disarm').disabled = val.length !== 4;
+}
+
+function onCodeKeydown(e) {
+  if (e.key === 'Enter' && codeBuffer.length === 4) submitCode();
+}
+
+function renderBoxes(val, isError) {
+  for (let i = 0; i < 4; i++) {
+    const box = document.getElementById('cb'+i);
+    const ch  = val[i];
+    box.textContent = ch || '_';
+    box.className = 'code-box';
+    if (isError)   box.classList.add('error');
+    else if (ch)   box.classList.add('filled');
+    else if (i===val.length) box.classList.add('active');
+  }
+}
+
+/* ── SUBMIT ── */
+function submitCode() {
+  if (isLockedOut()) return;
+  if (codeBuffer.length !== 4) return;
+
+  const correct = codeBuffer === (session.code || '');
+  if (correct) {
+    handleSuccess();
+  } else {
+    handleWrongCode();
+  }
+}
+
+function handleSuccess() {
+  const key = myTeam.replace(/ /g,'_');
+  const elapsed = session.startedAt
+    ? Date.now() - session.startedAt
+    : 0;
+  const hints = teamData.hintsUsed || 0;
+  const wrong = teamData.wrongAttempts || 0;
+  const adjMs = elapsed + hints*60000 + wrong*30000;
+
+  teamsRef.child(key).update({
+    completed:           true,
+    completedAt:         Date.now(),
+    adjustedCompletionMs: adjMs
+  });
+  stopTick();
+  showSuccessScreen();
+}
+
+function handleWrongCode() {
+  const key = myTeam.replace(/ /g,'_');
+  const wrong = (teamData.wrongAttempts||0) + 1;
+  const lockUntil = Date.now() + 10000;
+
+  teamsRef.child(key).update({ wrongAttempts:wrong, lockoutUntil:lockUntil });
+
+  renderBoxes(codeBuffer, true);
+  startLockout(10000);
+
+  // Clear input
+  setTimeout(() => {
+    codeBuffer = '';
+    document.getElementById('code-hidden').value = '';
+    renderBoxes('', false);
+    document.getElementById('btn-disarm').disabled = true;
+    document.getElementById('btn-disarm').className = 'btn-disarm';
+  }, 600);
+}
+
+/* ── LOCKOUT ── */
+function isLockedOut() {
+  return teamData.lockoutUntil && Date.now() < teamData.lockoutUntil;
+}
+
+function checkLockout() {
+  if (isLockedOut()) {
+    const remaining = teamData.lockoutUntil - Date.now();
+    startLockout(remaining);
+  }
+}
+
+function startLockout(durationMs) {
+  clearInterval(lockoutInterval);
+  const inp  = document.getElementById('code-hidden');
+  const btn  = document.getElementById('btn-disarm');
+  const bar  = document.getElementById('lockout-bar');
+  const wrap = document.getElementById('lockout-bar-wrap');
+  const msg  = document.getElementById('lockout-msg');
+
+  inp.setAttribute('readonly','');
+  btn.disabled = true;
+  wrap.style.display = 'block';
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+
+  const endTime = Date.now() + durationMs;
+
+  setTimeout(() => {
+    bar.style.transition = `width ${durationMs}ms linear`;
+    bar.style.width = '0%';
+  }, 30);
+
+  lockoutInterval = setInterval(() => {
+    const rem = endTime - Date.now();
+    if (rem <= 0) {
+      clearInterval(lockoutInterval);
+      inp.removeAttribute('readonly');
+      wrap.style.display = 'none';
+      bar.style.width = '100%';
+      msg.textContent = '';
+      inp.focus();
+    } else {
+      msg.textContent = `Locked — ${Math.ceil(rem/1000)}s`;
+    }
+  }, 100);
+}
+
+/* ═══════════════════════════════════════
+   SUCCESS SCREEN
+═══════════════════════════════════════ */
+function showSuccessScreen() {
+  showScreen('screen-success');
+  stopTick();
+
+  const lines = [
+    { cls:'s-small',  text:'SHADE · Secure Terminal',    delay:200  },
+    { cls:'s-main',   text:'DEVICE DISARMED',             delay:600  },
+    { cls:'s-sub',    text:'Transmission Secured',        delay:1000 },
+    { cls:'s-team',   text:myTeam,                        delay:1400 },
+    { cls:'s-detail', text:'Await debrief confirmation',  delay:2000 },
+  ];
+
+  const container = document.getElementById('success-lines');
+  container.innerHTML = '';
+
+  lines.forEach(({ cls, text, delay }) => {
+    const el = document.createElement('div');
+    el.className = `success-line ${cls}`;
+    el.textContent = text;
+    el.style.animationDelay = delay + 'ms';
+    container.appendChild(el);
+  });
+}
+
+/* ═══════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Restore session on refresh
+(function restoreSession() {
+  const saved = sessionStorage.getItem('shade_team');
+  if (!saved) return;
+  const key = saved.replace(/ /g,'_');
+  teamsRef.child(key).once('value').then(snap => {
+    const t = snap.val();
+    if (!t || !t.enabled) { sessionStorage.removeItem('shade_team'); return; }
+    myTeam   = saved;
+    teamData = t;
+    if (t.completed) {
+      showScreen('screen-success');
+      showSuccessScreen();
+    } else {
+      enterDisarmScreen();
+    }
+  });
+})();
+
+// Save team to sessionStorage on login
+const _origEnter = enterDisarmScreen;
+function enterDisarmScreen() {
+  sessionStorage.setItem('shade_team', myTeam);
+  _origEnter();
+}
+</script>
+</body>
+</html>
