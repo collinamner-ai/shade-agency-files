@@ -403,7 +403,10 @@ function renderGrid(){
     var cardCls='team-card'+(done?' done':locked?' locked':loggedIn?' active':'');
     var badge=done?'<span class="tc-badge b-done">Disarmed</span>':locked?'<span class="tc-badge b-lock">Locked</span>':loggedIn?'<span class="tc-badge b-on">Active</span>':'<span class="tc-badge b-wait">Waiting</span>';
     var h1c=hints>=1?' used':'', h2c=hints>=2?' used':'', h3c=hints>=3?' used':'';
-    var h1d=(hints>=1||done)?'disabled':'', h2d=(hints>=2||done)?'disabled':'', h3d=(hints>=3||done)?'disabled':'';
+    // Sequential: H1 only if no hints yet, H2 only if exactly 1, H3 only if exactly 2
+    var h1d=(hints>=1||done)?'disabled':'';
+    var h2d=(hints!==1||done)?'disabled':'';
+    var h3d=(hints!==2||done)?'disabled':'';
     var timerEl=done
       ?'<div class="tc-timer done"><span class="tc-time-main">'+fmtMain(adj)+'</span><span class="tc-ms">.<span class="tc-time-ms">'+fmtMs(adj)+'</span></span></div>'
       :'<div class="tc-timer '+timeCls+'" data-tc="'+name+'"><span class="tc-time-main">'+fmtMain(adj)+'</span><span class="tc-ms">.<span class="tc-time-ms">'+fmtMs(adj)+'</span></span></div>';
