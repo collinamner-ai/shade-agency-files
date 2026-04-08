@@ -1,1 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SHADE — Evidence Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    touch-action: manipulation;
+    overscroll-behavior: none;
+  }
+
+  body {
+    font-family: 'Oswald', sans-serif;
+    max-width: 420px;
+    margin: 0 auto;
+    background: #ffffff;
+    /* Lock portrait */
+    screen-orientation: portrait;
+  }
+
+  /* ════════════════════════════════════════
+     EVIDENCE PAGE (always underneath)
+  ════════════════════════════════════════ */
+  .evidence-page {
+    position: fixed;
+    inset: 0;
+    max-width: 420px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    /* safe areas for notch / home bar */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .evidence-header {
+    flex-shrink: 0;
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+  }
+
+  .evidence-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 4px;
+  }
+
+  .evidence-title {
+    font-size: 26px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #111;
+  }
+
+  .evidence-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 24px;
+    min-height: 0;
+  }
+
+  .fp-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fp-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .evidence-footer {
+    flex-shrink: 0;
+    /* generous bottom buffer for home bar / short phones */
+    padding: 14px 24px max(24px, env(safe-area-inset-bottom, 24px));
+    border-top: 1px solid #eee;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .evidence-footer-text {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: #bbb;
+    text-transform: uppercase;
+  }
+
+  /* ════════════════════════════════════════
+     LOGIN OVERLAY
+  ════════════════════════════════════════ */
+  .login-overlay {
+    position: fixed;
+    inset: 0;
+    max-width: 420px;
+    margin: 0 auto;
+    background: #0a0b0c;
+    color: #f0ece0;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.6s ease;
+    overflow: hidden;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .login-overlay.dismissed {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ── REUSABLE HEADER ── */
+  .login-header {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid #1c1f22;
+  }
+
+  .login-header img.seal {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+  }
+
+  .login-header .case-ref {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #c9a84c;
+    text-align: center;
+  }
+
+  .login-header .instruction {
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: #ffffff;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ── LOGIN BODY ── */
+  .login-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px 24px;
+    gap: 14px;
+    min-height: 0;
+  }
+
+  .name-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .name-btn {
+    background: #1c1f22;
+    border: 1px solid #2c3035;
+    border-radius: 4px;
+    padding: 13px 8px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: #adb3ba;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.12s;
+    user-select: none;
+  }
+
+  .name-btn.selected {
+    background: #041a0a;
+    border-color: #27ae60;
+    color: #2ecc71;
+  }
+
+  .name-btn:active { transform: scale(0.95); }
+
+  .error-msg {
+    display: none;
+    font-family: 'Courier Prime', monospace;
+    font-size: 14px;
+    color: #e74c3c;
+    text-align: center;
+    padding: 12px;
+    border: 1px solid #b03a2e;
+    border-radius: 3px;
+  }
+
+  .error-msg.visible { display: block; }
+
+  /* ── LOGIN FOOTER ── */
+  .login-footer {
+    flex-shrink: 0;
+    padding: 0 24px max(28px, env(safe-area-inset-bottom, 28px));
+    margin-bottom: 12px;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: #c9a84c;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0a0b0c;
+    cursor: pointer;
+    opacity: 0.3;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+
+  .btn-submit.ready { opacity: 1; pointer-events: auto; }
+
+  /* ── PORTRAIT LOCK ── */
+  @media screen and (orientation: landscape) {
+    body::after {
+      content: 'Please rotate your device to portrait mode';
+      position: fixed;
+      inset: 0;
+      background: #0a0b0c;
+      color: #c9a84c;
+      font-family: 'Oswald', sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 40px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     EVIDENCE PAGE (always underneath)
+════════════════════════════════════════ -->
+<div class="evidence-page">
+  <div class="evidence-header">
+    <div class="evidence-label">Exhibit FP-1</div>
+    <div class="evidence-title">Recovered Fingerprint</div>
+  </div>
+  <div class="evidence-body">
+    <div class="fp-wrapper">
+      <img src="assets/img/evidence-env1.png" alt="Recovered Fingerprint">
+    </div>
+  </div>
+  <div class="evidence-footer">
+    <div class="evidence-footer-text">SHADE · Case File ENV-01</div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     LOGIN OVERLAY
+════════════════════════════════════════ -->
+<div class="login-overlay" id="login-overlay">
+
+  <!-- ── REUSABLE HEADER ── copy this block to new pages, change text only -->
+  <div class="login-header">
+    <img class="seal" src="assets/img/shade-seal.png" alt="SHADE Seal">
+    <div class="case-ref">SHADE · ENV-01</div>
+    <p class="instruction">Select the five verified operative code names to unlock the evidence.</p>
+  </div>
+
+  <!-- ── LOGIN BODY ── swap this out per page -->
+  <div class="login-body">
+    <div class="name-grid" id="name-grid"></div>
+    <div class="error-msg" id="error-msg">Access denied. Incorrect selection.</div>
+  </div>
+
+  <!-- ── FOOTER ── always the same -->
+  <div class="login-footer">
+    <button class="btn-submit" id="btn-submit" onclick="submitAccess()">Access Evidence</button>
+  </div>
+
+</div>
+
+
+<script>
+  const CORRECT = new Set(['VESTA','ARES','HADES','FREYA','LOKI']);
+  const ALL = ['VESTA','ARES','HADES','FREYA','LOKI','ODIN','VISHNU','MARS','AMUN-RA'];
+  let selected = new Set();
+
+  const shuffled = [...ALL].sort(() => Math.random() - 0.5);
+  const grid = document.getElementById('name-grid');
+
+  shuffled.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'name-btn';
+    btn.textContent = name;
+    btn.onclick = () => {
+      if (selected.has(name)) {
+        selected.delete(name);
+        btn.classList.remove('selected');
+      } else {
+        if (selected.size >= 5) return;
+        selected.add(name);
+        btn.classList.add('selected');
+      }
+      document.getElementById('btn-submit').classList.toggle('ready', selected.size === 5);
+    };
+    grid.appendChild(btn);
+  });
+
+  function submitAccess() {
+    const correct = selected.size === 5 && [...selected].every(n => CORRECT.has(n));
+    if (correct) {
+      document.getElementById('login-overlay').classList.add('dismissed');
+    } else {
+      document.getElementById('error-msg').classList.add('visible');
+    }
+  }
+</script>
+</body>
+</html>
