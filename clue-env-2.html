@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SHADE — Evidence Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    touch-action: manipulation;
+    overscroll-behavior: none;
+  }
+
+  body {
+    font-family: 'Oswald', sans-serif;
+    max-width: 420px;
+    margin: 0 auto;
+    background: #000;
+  }
+
+  /* ════════════════════════════════════════
+     EVIDENCE PAGE — black, always underneath
+  ════════════════════════════════════════ */
+  .evidence-page {
+    position: fixed;
+    inset: 0;
+    max-width: 420px;
+    margin: 0 auto;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .evidence-header {
+    flex-shrink: 0;
+    width: 100%;
+    padding: 36px 24px 20px;
+    text-align: center;
+  }
+
+  .evidence-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  .evidence-heading {
+    font-family: 'Oswald', sans-serif;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #f0ece0;
+    margin-top: 6px;
+  }
+
+  .evidence-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    width: 100%;
+    padding: 0 24px;
+    min-height: 0;
+  }
+
+  .morse-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 2px solid #222;
+    background: #0a0a0a;
+    transition: background 0.05s ease, border-color 0.05s ease;
+  }
+
+  .morse-circle.flash {
+    background: #f0ece0;
+    border-color: #f0ece0;
+  }
+
+  /* subtle dot/dash indicator beneath the circle */
+  .morse-symbol {
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.08s ease;
+  }
+
+  .morse-symbol.show { opacity: 1; }
+
+  .morse-symbol .sym-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #444;
+  }
+
+  .morse-symbol .sym-dash {
+    width: 38px;
+    height: 4px;
+    border-radius: 2px;
+    background: #444;
+  }
+
+  .btn-start {
+    padding: 15px 48px;
+    background: transparent;
+    border: 1px solid #333;
+    border-radius: 3px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #f0ece0;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .btn-start:active {
+    border-color: #c9a84c;
+    color: #c9a84c;
+  }
+
+  .btn-repeat {
+    display: none;
+    padding: 12px 40px;
+    background: transparent;
+    border: 1px solid #2a2a2a;
+    border-radius: 3px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #444;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .btn-repeat.visible { display: block; }
+
+  .btn-repeat:active {
+    border-color: #555;
+    color: #888;
+  }
+
+  /* ── TRANSMISSION STATUS ── */
+  .transmission-status {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #333;
+    text-align: center;
+    min-height: 16px;
+    transition: color 0.3s;
+  }
+
+  .transmission-status.active {
+    color: #555;
+  }
+
+  /* ════════════════════════════════════════
+     CONNECTING ANIMATION OVERLAY
+  ════════════════════════════════════════ */
+  .connecting-overlay {
+    position: fixed;
+    inset: 0;
+    max-width: 420px;
+    margin: 0 auto;
+    background: #0a0b0c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    padding: 48px 40px;
+  }
+
+  .connecting-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .connecting-seal {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    opacity: 0.6;
+  }
+
+  .connecting-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #c9a84c;
+    text-align: center;
+  }
+
+  .connecting-track {
+    width: 100%;
+    height: 2px;
+    background: #1c1f22;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .connecting-fill {
+    height: 100%;
+    width: 0%;
+    background: #c9a84c;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .connecting-status {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: #555;
+    text-align: center;
+    min-height: 18px;
+  }
+
+  /* ════════════════════════════════════════
+     LOGIN OVERLAY
+  ════════════════════════════════════════ */
+  .login-overlay {
+    position: fixed;
+    inset: 0;
+    max-width: 420px;
+    margin: 0 auto;
+    background: #0a0b0c;
+    color: #f0ece0;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.6s ease;
+    overflow: hidden;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .login-overlay.dismissed {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ── REUSABLE HEADER ── */
+  .login-header {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid #1c1f22;
+  }
+
+  .login-header img.seal {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+  }
+
+  .login-header .case-ref {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #c9a84c;
+    text-align: center;
+  }
+
+  .login-header .instruction {
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: #ffffff;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ── LOGIN BODY ── */
+  .login-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px 24px;
+    gap: 20px;
+    min-height: 0;
+  }
+
+  /* ── DROPDOWNS ── */
+  .dropdown-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dropdown-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .dropdown-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .dropdown-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  .dropdown-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: #1c1f22;
+    border: 1px solid #2c3035;
+    border-radius: 4px;
+    padding: 14px 36px 14px 14px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: #adb3ba;
+    cursor: pointer;
+    width: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+
+  .dropdown-select:focus {
+    outline: none;
+    border-color: #c9a84c;
+    color: #f0ece0;
+  }
+
+  .dropdown-select.filled {
+    color: #f0ece0;
+    border-color: #3d4349;
+  }
+
+  .dropdown-select option {
+    background: #1c1f22;
+    color: #f0ece0;
+  }
+
+  /* ── ERROR ── */
+  .error-msg {
+    display: none;
+    font-family: 'Courier Prime', monospace;
+    font-size: 14px;
+    color: #e74c3c;
+    text-align: center;
+    padding: 12px;
+    border: 1px solid #b03a2e;
+    border-radius: 3px;
+  }
+
+  .error-msg.visible { display: block; }
+
+  /* ── LOGIN FOOTER ── */
+  .login-footer {
+    flex-shrink: 0;
+    padding: 0 24px max(28px, env(safe-area-inset-bottom, 28px));
+    margin-bottom: 12px;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: #c9a84c;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0a0b0c;
+    cursor: pointer;
+    opacity: 0.3;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+
+  .btn-submit.ready { opacity: 1; pointer-events: auto; }
+
+  /* ── PORTRAIT LOCK ── */
+  @media screen and (orientation: landscape) {
+    body::after {
+      content: 'Please rotate your device to portrait mode';
+      position: fixed;
+      inset: 0;
+      background: #0a0b0c;
+      color: #c9a84c;
+      font-family: 'Oswald', sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 40px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     EVIDENCE PAGE
+════════════════════════════════════════ -->
+<div class="evidence-page">
+  <div class="evidence-header">
+    <div class="evidence-title">Intercepted Transmission</div>
+    <div class="evidence-heading">Chosen Target</div>
+  </div>
+
+  <div class="evidence-body">
+    <div class="morse-circle" id="morse-circle"></div>
+    <div class="morse-symbol" id="morse-symbol"></div>
+    <div class="transmission-status" id="transmission-status">—</div>
+    <button class="btn-start" id="btn-start" onclick="startMorse()">Start</button>
+    <button class="btn-repeat" id="btn-repeat" onclick="repeatMorse()">Repeat</button>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     CONNECTING ANIMATION
+════════════════════════════════════════ -->
+<div class="connecting-overlay" id="connecting-overlay">
+  <img class="connecting-seal" src="assets/img/shade-seal.png" alt="SHADE">
+  <div class="connecting-label">Establishing secure connection</div>
+  <div class="connecting-track">
+    <div class="connecting-fill" id="connecting-fill"></div>
+  </div>
+  <div class="connecting-status" id="connecting-status">Authenticating...</div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     LOGIN OVERLAY
+════════════════════════════════════════ -->
+<div class="login-overlay" id="login-overlay">
+
+  <!-- REUSABLE HEADER — change case-ref and instruction text per page -->
+  <div class="login-header">
+    <img class="seal" src="assets/img/shade-seal.png" alt="SHADE Seal">
+    <div class="case-ref">SHADE · ENV-02</div>
+    <p class="instruction">Enter the date and time of the operation to access the transmission.</p>
+  </div>
+
+  <!-- LOGIN BODY -->
+  <div class="login-body">
+
+    <div class="dropdown-group">
+      <div class="dropdown-row">
+
+        <div class="dropdown-field">
+          <div class="dropdown-label">Day</div>
+          <select class="dropdown-select" id="sel-day" onchange="onSelectChange()">
+            <option value="">DD</option>
+            <option>01</option><option>02</option><option>03</option><option>04</option>
+            <option>05</option><option>06</option><option>07</option><option>08</option>
+            <option>09</option><option>10</option><option>11</option><option>12</option>
+            <option>13</option><option>14</option><option>15</option><option>16</option>
+            <option>17</option><option>18</option><option>19</option><option>20</option>
+            <option>21</option><option>22</option><option>23</option><option>24</option>
+            <option>25</option><option>26</option><option>27</option><option>28</option>
+            <option>29</option><option>30</option><option>31</option>
+          </select>
+        </div>
+
+        <div class="dropdown-field">
+          <div class="dropdown-label">Month</div>
+          <select class="dropdown-select" id="sel-month" onchange="onSelectChange()">
+            <option value="">Month</option>
+            <option>January</option><option>February</option><option>March</option>
+            <option>April</option><option>May</option><option>June</option>
+            <option>July</option><option>August</option><option>September</option>
+            <option>October</option><option>November</option><option>December</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="dropdown-row">
+
+        <div class="dropdown-field">
+          <div class="dropdown-label">Hour (24hr)</div>
+          <select class="dropdown-select" id="sel-hour" onchange="onSelectChange()">
+            <option value="">HH</option>
+            <option>00</option><option>01</option><option>02</option><option>03</option>
+            <option>04</option><option>05</option><option>06</option><option>07</option>
+            <option>08</option><option>09</option><option>10</option><option>11</option>
+            <option>12</option><option>13</option><option>14</option><option>15</option>
+            <option>16</option><option>17</option><option>18</option><option>19</option>
+            <option>20</option><option>21</option><option>22</option><option>23</option>
+          </select>
+        </div>
+
+        <div class="dropdown-field">
+          <div class="dropdown-label">Minute</div>
+          <select class="dropdown-select" id="sel-min" onchange="onSelectChange()">
+            <option value="">MM</option>
+            <option>00</option><option>01</option><option>02</option><option>03</option>
+            <option>04</option><option>05</option><option>06</option><option>07</option>
+            <option>08</option><option>09</option><option>10</option><option>11</option>
+            <option>12</option><option>13</option><option>14</option><option>15</option>
+            <option>16</option><option>17</option><option>18</option><option>19</option>
+            <option>20</option><option>21</option><option>22</option><option>23</option>
+            <option>24</option><option>25</option><option>26</option><option>27</option>
+            <option>28</option><option>29</option><option>30</option><option>31</option>
+            <option>32</option><option>33</option><option>34</option><option>35</option>
+            <option>36</option><option>37</option><option>38</option><option>39</option>
+            <option>40</option><option>41</option><option>42</option><option>43</option>
+            <option>44</option><option>45</option><option>46</option><option>47</option>
+            <option>48</option><option>49</option><option>50</option><option>51</option>
+            <option>52</option><option>53</option><option>54</option><option>55</option>
+            <option>56</option><option>57</option><option>58</option><option>59</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="error-msg" id="error-msg">Access denied. Incorrect date or time.</div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="login-footer">
+    <button class="btn-submit" id="btn-submit" onclick="submitAccess()">Access Evidence</button>
+  </div>
+
+</div>
+
+
+<script>
+  /* ── CORRECT ANSWER ── */
+  const CORRECT = { day: '11', month: 'November', hour: '19', minute: '21' };
+
+  /* ── DROPDOWNS ── */
+  function onSelectChange() {
+    const all = ['sel-day','sel-month','sel-hour','sel-min']
+      .every(id => document.getElementById(id).value !== '');
+    document.getElementById('btn-submit').classList.toggle('ready', all);
+    ['sel-day','sel-month','sel-hour','sel-min'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.toggle('filled', el.value !== '');
+    });
+    document.getElementById('error-msg').classList.remove('visible');
+  }
+
+  /* ── CONNECTING ANIMATION ── */
+  function runConnecting(onComplete) {
+    const overlay = document.getElementById('connecting-overlay');
+    const fill    = document.getElementById('connecting-fill');
+    const status  = document.getElementById('connecting-status');
+
+    overlay.classList.add('active');
+
+    const steps = [
+      { pct: 30, text: 'Authenticating...',       delay: 0   },
+      { pct: 60, text: 'Decrypting access codes...', delay: 700 },
+      { pct: 85, text: 'Accessing secure files...',  delay: 1400},
+      { pct: 100, text: 'Access granted',            delay: 2000},
+    ];
+
+    steps.forEach(({ pct, text, delay }) => {
+      setTimeout(() => {
+        fill.style.width = pct + '%';
+        status.textContent = text;
+      }, delay);
+    });
+
+    setTimeout(() => {
+      overlay.classList.remove('active');
+      onComplete();
+    }, 2800);
+  }
+
+  /* ── SUBMIT ── */
+  function submitAccess() {
+    const day   = document.getElementById('sel-day').value;
+    const month = document.getElementById('sel-month').value;
+    const hour  = document.getElementById('sel-hour').value;
+    const min   = document.getElementById('sel-min').value;
+
+    const correct = day === CORRECT.day && month === CORRECT.month &&
+                    hour === CORRECT.hour && min === CORRECT.minute;
+
+    if (correct) {
+      document.getElementById('login-overlay').classList.add('dismissed');
+      runConnecting(() => { /* evidence page now fully visible */ });
+    } else {
+      document.getElementById('error-msg').classList.add('visible');
+    }
+  }
+
+  /* ════════════════════════════════════════
+     MORSE CODE
+  ════════════════════════════════════════ */
+  const MORSE = {
+    A:'.-',  B:'-...', C:'-.-.', D:'-..', E:'.', F:'..-.',
+    G:'--.', H:'....', I:'..', J:'.---', K:'-.-', L:'.-..',
+    M:'--',  N:'-.',   O:'---', P:'.--.', Q:'--.-', R:'.-.',
+    S:'...',  T:'-',   U:'..-', V:'...-', W:'.--', X:'-..-',
+    Y:'-.--', Z:'--..'
+  };
+
+  const DOT      = 220;   // short flash
+  const DASH     = 1100;  // very long and obvious flash
+  const SYM_GAP  = 200;   // gap between dots/dashes within a letter
+  const LET_GAP  = 700;   // gap between letters
+  const WORD_GAP = 1600;  // gap between words
+
+  function buildSequence(text) {
+    const seq = [];
+    const words = text.toUpperCase().split(' ');
+    words.forEach((word, wi) => {
+      word.split('').forEach((char, ci) => {
+        const symbols = MORSE[char];
+        if (!symbols) return;
+        symbols.split('').forEach((sym, si) => {
+          seq.push({ on: true,  dur: sym === '.' ? DOT : DASH });
+          if (si < symbols.length - 1) {
+            seq.push({ on: false, dur: SYM_GAP });
+          }
+        });
+        if (ci < word.length - 1) {
+          seq.push({ on: false, dur: LET_GAP });
+        }
+      });
+      if (wi < words.length - 1) {
+        seq.push({ on: false, dur: WORD_GAP });
+      }
+    });
+    return seq;
+  }
+
+  const TARGET   = 'PALACE OF WESTMINSTER';
+  const sequence = buildSequence(TARGET);
+  const circle   = document.getElementById('morse-circle');
+  const statusEl = document.getElementById('transmission-status');
+  const startBtn = document.getElementById('btn-start');
+  const repeatBtn = document.getElementById('btn-repeat');
+  const symbolEl = document.getElementById('morse-symbol');
+  let   morseTimer = null;
+  let   symbolTimer = null;
+  let   playCount = 0;
+  const SPEEDS = [0.48, 0.67, 1.27];
+
+  function getSpeed() {
+    return SPEEDS[Math.min(playCount, SPEEDS.length - 1)];
+  }
+
+  function showSymbol(type, speed) {
+    clearTimeout(symbolTimer);
+    symbolEl.innerHTML = type === 'dot'
+      ? '<div class="sym-dot"></div>'
+      : '<div class="sym-dash"></div>';
+    symbolEl.classList.add('show');
+    symbolTimer = setTimeout(() => symbolEl.classList.remove('show'),
+      (type === 'dot' ? DOT : DASH) * speed + 80);
+  }
+
+  function runSequence() {
+    circle.classList.remove('flash');
+    symbolEl.classList.remove('show');
+    repeatBtn.classList.remove('visible');
+    statusEl.textContent = 'Receiving...';
+    statusEl.classList.add('active');
+
+    const speed = getSpeed();
+    playCount++;
+
+    let i = 0;
+    function step() {
+      if (i >= sequence.length) {
+        circle.classList.remove('flash');
+        symbolEl.classList.remove('show');
+        statusEl.textContent = 'Transmission complete';
+        statusEl.classList.remove('active');
+        repeatBtn.classList.add('visible');
+        morseTimer = null;
+        return;
+      }
+      const { on, dur } = sequence[i++];
+      const scaledDur = Math.round(dur * speed);
+      if (on) {
+        const isDot = dur === DOT;
+        circle.classList.add('flash');
+        showSymbol(isDot ? 'dot' : 'dash', speed);
+      } else {
+        circle.classList.remove('flash');
+      }
+      morseTimer = setTimeout(step, scaledDur);
+    }
+    step();
+  }
+
+  function startMorse() {
+    if (morseTimer) return;
+    startBtn.style.display = 'none';
+    runSequence();
+  }
+
+  function repeatMorse() {
+    if (morseTimer) return;
+    runSequence();
+  }
+</script>
+</body>
+</html>
