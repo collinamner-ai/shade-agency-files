@@ -2,142 +2,106 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>SHADE — Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<title>SHADE · Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-  html, body {
-    height: 100%;
-    overflow: hidden;
-    touch-action: manipulation;
-    overscroll-behavior: none;
-  }
+html, body {
+  min-height:100vh;
+  background:#0a0b0c;
+  color:#f0ece0;
+  font-family:'Oswald', sans-serif;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
-  body {
-    font-family: 'Oswald', sans-serif;
-    max-width: 420px;
-    margin: 0 auto;
-    background: #0a0b0c;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 40px;
-    padding: 40px 32px max(40px, env(safe-area-inset-bottom, 40px));
-    padding-top: max(40px, env(safe-area-inset-top, 40px));
-  }
+.page {
+  width:100%;
+  max-width:520px;
+  padding:48px 32px max(48px, env(safe-area-inset-bottom, 48px));
+  padding-top:max(48px, env(safe-area-inset-top, 48px));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:36px;
+}
 
-  /* ── HEADER ── */
-  .header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
+.header { display:flex; flex-direction:column; align-items:center; gap:14px; }
+.header img { width:120px; height:120px; object-fit:contain; }
+.header-name { font-size:28px; font-weight:700; letter-spacing:0.25em; text-align:center; }
+.header-ref  { font-family:'Courier Prime', monospace; font-size:10px; letter-spacing:0.25em; text-transform:uppercase; color:#c9a84c; text-align:center; }
 
-  .header img {
-    width: 130px;
-    height: 130px;
-    object-fit: contain;
-  }
+.divider { width:100%; height:1px; background:linear-gradient(to right, transparent, #2c3035, transparent); }
 
-  .header-ref {
-    font-family: 'Courier Prime', monospace;
-    font-size: 10px;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: #c9a84c;
-    text-align: center;
-  }
+.btn-grid { display:flex; flex-direction:column; gap:10px; width:100%; }
 
-  /* ── BUTTONS ── */
-  .btn-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
-  }
+.btn-link {
+  display:flex; align-items:center; justify-content:space-between;
+  width:100%; padding:18px 22px;
+  background:#141618; border:1px solid #2c3035; border-radius:4px;
+  font-family:'Oswald', sans-serif; font-size:17px; font-weight:600;
+  letter-spacing:0.08em; text-transform:uppercase; color:#f0ece0;
+  text-decoration:none; cursor:pointer; transition:border-color 0.15s, background 0.15s;
+}
+.btn-link:hover  { background:#1c1f22; border-color:#c9a84c; }
+.btn-label { flex:1; }
+.btn-arrow { color:#444; font-size:20px; flex-shrink:0; }
 
-  .btn-link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 18px 20px;
-    background: #141618;
-    border: 1px solid #2c3035;
-    border-radius: 3px;
-    font-family: 'Oswald', sans-serif;
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #f0ece0;
-    text-decoration: none;
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
-  }
+/* ── WIDE (tablet / laptop) ── */
+@media (min-width: 700px) {
+  .page { max-width:860px; flex-direction:row; align-items:center; gap:64px; padding:60px 60px; }
+  .header { flex-shrink:0; width:240px; }
+  .header img { width:170px; height:170px; }
+  .header-name { font-size:34px; }
+  .divider { display:none; }
+  .vsep { display:block !important; width:1px; height:300px; background:linear-gradient(to bottom, transparent, #2c3035, transparent); flex-shrink:0; }
+  .btn-grid { gap:12px; }
+  .btn-link { font-size:18px; padding:20px 24px; }
+}
 
-  .btn-link:active {
-    background: #1c1f22;
-    border-color: #c9a84c;
-  }
-
-  .btn-arrow {
-    color: #555;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-
-  @media screen and (orientation: landscape) {
-    body::after {
-      content: 'Please rotate your device to portrait mode';
-      position: fixed;
-      inset: 0;
-      background: #0a0b0c;
-      color: #c9a84c;
-      font-family: 'Oswald', sans-serif;
-      font-size: 18px;
-      letter-spacing: 0.08em;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      padding: 40px;
-    }
-  }
+@media (min-width:1100px) {
+  .page { gap:80px; padding:60px 80px; }
+  .header img { width:190px; height:190px; }
+  .btn-link { font-size:20px; padding:22px 28px; }
+}
 </style>
 </head>
 <body>
+<div class="page">
 
   <div class="header">
     <img src="assets/img/shade-seal.png" alt="SHADE Seal">
-    <div class="header-ref">SHADE · Admin Access</div>
+    <div class="header-name">SHADE</div>
+    <div class="header-ref">Admin Access</div>
   </div>
+
+  <div class="divider"></div>
+  <div class="vsep" style="display:none"></div>
 
   <div class="btn-grid">
     <a class="btn-link" href="clue-env-1.html">
-      Evidence 1
+      <span class="btn-label">Evidence 1</span>
       <span class="btn-arrow">›</span>
     </a>
     <a class="btn-link" href="clue-env-2.html">
-      Evidence 2
+      <span class="btn-label">Evidence 2</span>
       <span class="btn-arrow">›</span>
     </a>
     <a class="btn-link" href="final-disarm.html">
-      Final Code
+      <span class="btn-label">Final Code</span>
       <span class="btn-arrow">›</span>
     </a>
     <a class="btn-link" href="shade-admin.html">
-      Admin Panel
+      <span class="btn-label">Admin Panel</span>
       <span class="btn-arrow">›</span>
     </a>
   </div>
 
+</div>
 </body>
 </html>
