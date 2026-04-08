@@ -1,1 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHADE — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:     #f1f3f5;
+  --white:  #ffffff;
+  --border: #e2e5e9;
+  --text:   #0f1117;
+  --muted:  #5c6370;
+  --subtle: #9ba3ae;
+  --navy:   #18223a;
+  --navy2:  #253354;
+  --gold:   #c9a84c;
+  --red:    #d42b2b;
+  --green:  #15803d;
+  --amber:  #a16207;
+  --sans:   'Oswald', sans-serif;
+  --mono:   'Courier Prime', monospace;
+}
+html, body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; }
 
+/* ── HEADER ── */
+.header {
+  background:var(--navy);
+  padding:16px 28px;
+  display:flex; align-items:center; gap:24px; flex-wrap:wrap;
+  position:sticky; top:0; z-index:100;
+  border-bottom:3px solid var(--gold);
+}
+.brand { display:flex; align-items:center; gap:12px; }
+.brand img { width:36px; height:36px; object-fit:contain; }
+.brand-name { font-size:20px; font-weight:700; letter-spacing:0.2em; color:#fff; }
+.brand-sub  { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; color:var(--gold); text-transform:uppercase; }
+
+/* Master clock */
+.master-clock {
+  font-family:var(--mono); font-size:38px; font-weight:700;
+  color:#fff; letter-spacing:0.04em; flex-shrink:0;
+}
+.master-clock .ms { font-size:22px; color:#888; }
+.master-clock.running { color:#4ade80; }
+.master-clock.running .ms { color:#2a7a45; }
+.master-clock.paused  { color:var(--gold); }
+
+/* Header buttons */
+.h-btns { display:flex; gap:10px; flex-wrap:wrap; }
+.hb {
+  font-family:var(--sans); font-size:13px; font-weight:600; letter-spacing:0.04em;
+  padding:10px 20px; border-radius:6px; border:none; cursor:pointer; white-space:nowrap;
+  transition:opacity 0.1s;
+}
+.hb:disabled { opacity:0.3; cursor:not-allowed; }
+.hb-start { background:#fff; color:var(--navy); }
+.hb-pause { background:rgba(255,255,255,0.12); color:#ddd; border:1px solid rgba(255,255,255,0.2); }
+.hb-reset { background:rgba(212,43,43,0.2); color:#f87171; border:1px solid rgba(212,43,43,0.35); }
+
+/* Code + Add in header */
+.h-right { display:flex; align-items:center; gap:16px; margin-left:auto; flex-wrap:wrap; }
+.code-wrap { display:flex; align-items:center; gap:8px; }
+.code-label { font-family:var(--mono); font-size:9px; letter-spacing:0.15em; color:#888; text-transform:uppercase; }
+.code-input {
+  width:90px; text-align:center;
+  background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.2);
+  border-radius:6px; font-family:var(--mono); font-size:22px; font-weight:700;
+  letter-spacing:0.25em; color:var(--gold); padding:8px 4px;
+}
+.code-input:focus { outline:none; border-color:var(--gold); }
+.code-input::placeholder { color:#444; }
+.code-set { font-family:var(--sans); font-size:12px; font-weight:600; padding:9px 16px; background:var(--gold); color:#000; border:none; border-radius:6px; cursor:pointer; }
+
+.add-team-btn {
+  font-family:var(--sans); font-size:13px; font-weight:600; letter-spacing:0.04em;
+  padding:10px 22px; background:#fff; color:var(--navy); border:none; border-radius:6px;
+  cursor:pointer; white-space:nowrap;
+}
+.add-team-btn:disabled { opacity:0.3; cursor:not-allowed; }
+.add-team-btn:not(:disabled):hover { background:#e8eaf0; }
+
+/* ── MAIN ── */
+.main { padding:28px; max-width:1200px; margin:0 auto; }
+
+/* Team grid */
+.team-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
+
+/* ── TEAM CARD ── */
+.team-card {
+  background:var(--white); border:1px solid var(--border);
+  border-radius:10px; overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,0.06);
+}
+.team-card.done   { border-color:#86efac; }
+.team-card.active { border-color:#93c5fd; }
+
+.tc-head {
+  background:var(--navy); padding:12px 16px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.tc-name { font-size:18px; font-weight:700; letter-spacing:0.15em; color:#fff; }
+.tc-status {
+  font-family:var(--mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase;
+  padding:3px 9px; border-radius:20px; border:1px solid;
+}
+.st-wait { color:#666;         border-color:#444;    background:rgba(255,255,255,0.05); }
+.st-on   { color:#93c5fd;      border-color:#3b82f6; background:rgba(59,130,246,0.15); }
+.st-lock { color:#f87171;      border-color:#dc2626; background:rgba(220,38,38,0.15); animation:pulse .8s infinite; }
+.st-done { color:#4ade80;      border-color:#16a34a; background:rgba(22,163,74,0.15); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+/* Team timer */
+.tc-timer-wrap { padding:16px 16px 8px; text-align:center; }
+.tc-timer {
+  font-family:var(--mono); font-size:36px; font-weight:700;
+  color:var(--text); letter-spacing:0.03em;
+}
+.tc-timer .tc-ms { font-size:20px; color:var(--subtle); }
+.tc-timer.pen  { color:var(--red); }
+.tc-timer.done { color:var(--green); }
+.tc-timer-label {
+  font-family:var(--mono); font-size:8px; letter-spacing:0.15em;
+  color:var(--subtle); text-transform:uppercase; margin-top:3px;
+}
+
+/* Hint buttons */
+.tc-hints { padding:12px 16px 16px; display:flex; gap:8px; }
+.hint-btn {
+  flex:1; height:44px;
+  font-family:var(--sans); font-size:15px; font-weight:700; letter-spacing:0.06em;
+  border:2px solid #e5c97a; border-radius:7px;
+  background:var(--bg); color:#bbb;
+  cursor:pointer; transition:all 0.12s;
+}
+.hint-btn:not(:disabled):not(.used):hover {
+  background:#fffbeb; color:var(--amber); border-color:var(--amber);
+}
+.hint-btn.used {
+  background:#fffbeb; color:var(--amber); border-color:var(--amber);
+  font-weight:700;
+}
+.hint-btn.used::after { content:' ✓'; font-size:11px; }
+.hint-btn:disabled { opacity:0.25; cursor:not-allowed; }
+
+/* Remove */
+.tc-foot { padding:0 16px 14px; display:flex; justify-content:flex-end; }
+.tc-remove {
+  font-family:var(--mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase;
+  padding:5px 12px; background:transparent; border:1px solid var(--border);
+  border-radius:4px; color:var(--subtle); cursor:pointer;
+}
+.tc-remove:hover { border-color:#fca5a5; color:var(--red); background:#fef2f2; }
+
+/* Empty state */
+.empty-state {
+  grid-column: 1/-1; text-align:center; padding:60px 20px;
+  font-family:var(--mono); font-size:12px; letter-spacing:0.15em;
+  color:var(--subtle); text-transform:uppercase;
+}
+
+/* Toast */
+.toast {
+  position:fixed; bottom:20px; right:20px;
+  background:var(--navy); color:#fff; font-family:var(--mono); font-size:12px;
+  letter-spacing:0.08em; padding:11px 20px; border-radius:6px;
+  z-index:200; opacity:0; transform:translateY(6px); transition:all 0.2s; pointer-events:none;
+}
+.toast.show { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <img src="assets/img/shade-seal.png" alt="SHADE">
+    <div><div class="brand-name">SHADE</div><div class="brand-sub">Operations Admin</div></div>
+  </div>
+
+  <div class="master-clock" id="master-clock">
+    <span id="clock-main">00:00</span><span class="ms">.<span id="clock-ms">000</span></span>
+  </div>
+
+  <div class="h-btns">
+    <button class="hb hb-start" id="btn-start" onclick="startAll()">▶ Start All</button>
+    <button class="hb hb-pause" id="btn-pause" onclick="pauseAll()" disabled>⏸ Pause</button>
+    <button class="hb hb-reset" id="btn-reset" onclick="resetAll()">↺ Reset</button>
+  </div>
+
+  <div class="h-right">
+    <div class="code-wrap">
+      <span class="code-label">Final Code</span>
+      <input class="code-input" id="code-input" type="text" maxlength="4"
+             placeholder="——" onkeypress="return /[0-9]/.test(event.key)"
+             onkeydown="if(event.key==='Enter')saveCode()">
+      <button class="code-set" onclick="saveCode()">Set</button>
+    </div>
+    <button class="add-team-btn" id="btn-add" onclick="addTeam()">+ Add Team</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="team-grid" id="team-grid">
+    <div class="empty-state" id="empty-msg">No teams added — press + Add Team to begin</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/js/firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+'use strict';
+
+/* ── INIT ── */
+firebase.initializeApp(SHADE_FIREBASE_CONFIG);
+const db  = firebase.database();
+const SR  = db.ref('shade/session');
+const TR  = db.ref('shade/teams');
+
+const TEAM_NAMES = ['TEAM A','TEAM B','TEAM C','TEAM D','TEAM E','TEAM F',
+                    'TEAM G','TEAM H','TEAM I','TEAM J','TEAM K','TEAM L'];
+
+let S = {};  // session
+let T = {};  // teams
+let masterTick = null;
+
+/* ── FIREBASE ── */
+SR.on('value', snap => {
+  S = snap.val() || {};
+  renderHeader();
+  if (S.code) { const ci = document.getElementById('code-input'); if(!ci.value) ci.value = S.code; }
+  if (S.isRunning && !S.isPaused) startMasterTick();
+});
+
+TR.on('value', snap => {
+  T = snap.val() || {};
+  renderGrid();
+});
+
+/* ── MASTER TICK ── */
+function startMasterTick() {
+  clearInterval(masterTick);
+  masterTick = setInterval(tickAll, 50);
+}
+
+function tickAll() {
+  if (!S.isRunning || S.isPaused || !S.startedAt) return;
+  const master = Date.now() - S.startedAt;
+  // Update master clock display
+  const m  = Math.floor(master/60000).toString().padStart(2,'0');
+  const s  = Math.floor((master%60000)/1000).toString().padStart(2,'0');
+  const ms = (master%1000).toString().padStart(3,'0');
+  document.getElementById('clock-main').textContent = m+':'+s;
+  document.getElementById('clock-ms').textContent   = ms;
+  // Update each team timer
+  document.querySelectorAll('[data-teamclock]').forEach(el => {
+    const name = el.dataset.teamclock;
+    const t = T[key(name)];
+    if (!t || t.completed) return;
+    const adj = master + (t.hintsUsed||0)*60000 + (t.wrongAttempts||0)*30000;
+    const tm = Math.floor(adj/60000).toString().padStart(2,'0');
+    const ts = Math.floor((adj%60000)/1000).toString().padStart(2,'0');
+    const tms = (adj%1000).toString().padStart(3,'0');
+    el.querySelector('.tc-time-main').textContent = tm+':'+ts;
+    el.querySelector('.tc-time-ms').textContent   = tms;
+    el.className = 'tc-timer' + (adj>master?' pen':'');
+  });
+}
+
+/* ── SESSION CONTROLS ── */
+function startAll() {
+  SR.update({ isRunning:true, isPaused:false, startedAt:Date.now(), pausedElapsed:0 });
+  startMasterTick();
+  toast('All timers started');
+}
+
+function pauseAll() {
+  if (!S.isRunning) return;
+  if (!S.isPaused) {
+    const el = Date.now() - S.startedAt;
+    SR.update({ isPaused:true, pausedElapsed:el });
+    clearInterval(masterTick);
+    toast('Paused');
+  } else {
+    SR.update({ isPaused:false, startedAt: Date.now()-(S.pausedElapsed||0) });
+    startMasterTick();
+    toast('Resumed');
+  }
+}
+
+function resetAll() {
+  if (!confirm('Reset ALL timers and team progress?')) return;
+  clearInterval(masterTick);
+  SR.update({ isRunning:false, isPaused:false, startedAt:null, pausedElapsed:0 });
+  const updates = {};
+  TEAM_NAMES.forEach(n => {
+    if ((T[key(n)]||{}).enabled) {
+      updates[key(n)] = {
+        teamName:n, enabled:true, loggedIn:false,
+        hintsUsed:0, wrongAttempts:0, lockoutUntil:null,
+        completed:false, completedAt:null, adjustedCompletionMs:null
+      };
+    }
+  });
+  if (Object.keys(updates).length) TR.update(updates);
+  document.getElementById('clock-main').textContent = '00:00';
+  document.getElementById('clock-ms').textContent   = '000';
+  document.getElementById('master-clock').className = 'master-clock';
+  toast('Session reset');
+}
+
+function renderHeader() {
+  const bs = document.getElementById('btn-start');
+  const bp = document.getElementById('btn-pause');
+  const mc = document.getElementById('master-clock');
+  if (S.isRunning && !S.isPaused) {
+    mc.className = 'master-clock running';
+    bs.disabled = true; bp.disabled = false; bp.textContent = '⏸ Pause';
+    startMasterTick();
+  } else if (S.isPaused) {
+    mc.className = 'master-clock paused';
+    bs.disabled = true; bp.disabled = false; bp.textContent = '▶ Resume';
+    if (S.pausedElapsed) {
+      const m = Math.floor(S.pausedElapsed/60000).toString().padStart(2,'0');
+      const s = Math.floor((S.pausedElapsed%60000)/1000).toString().padStart(2,'0');
+      const ms = (S.pausedElapsed%1000).toString().padStart(3,'0');
+      document.getElementById('clock-main').textContent = m+':'+s;
+      document.getElementById('clock-ms').textContent   = ms;
+    }
+  } else {
+    mc.className = 'master-clock';
+    bs.disabled = false; bp.disabled = true; bp.textContent = '⏸ Pause';
+  }
+}
+
+function saveCode() {
+  const v = document.getElementById('code-input').value;
+  if (v.length !== 4) { toast('Enter a 4-digit code'); return; }
+  SR.update({ code:v });
+  toast('Code set: ' + v);
+}
+
+/* ── ADD / REMOVE ── */
+function addTeam() {
+  const next = TEAM_NAMES.find(n => !(T[key(n)]||{}).enabled);
+  if (!next) return;
+  TR.child(key(next)).set({
+    teamName:next, enabled:true, loggedIn:false,
+    hintsUsed:0, wrongAttempts:0, lockoutUntil:null,
+    completed:false, completedAt:null, adjustedCompletionMs:null
+  });
+  toast(next + ' added');
+}
+
+function removeTeam(name) {
+  if (!confirm('Remove ' + name + '?')) return;
+  TR.child(key(name)).update({ enabled:false, loggedIn:false });
+  toast(name + ' removed');
+}
+
+/* ── HINTS ── */
+function addHint(name, level) {
+  const cur = (T[key(name)]||{}).hintsUsed || 0;
+  if (cur >= level) return; // already given
+  TR.child(key(name)).update({ hintsUsed: level });
+  toast('H'+level+' given to '+name+' (+1 min)');
+}
+
+/* ── RENDER GRID ── */
+function renderGrid() {
+  const grid   = document.getElementById('team-grid');
+  const active = TEAM_NAMES.filter(n => (T[key(n)]||{}).enabled);
+
+  // Update add button
+  const nextTeam = TEAM_NAMES.find(n => !(T[key(n)]||{}).enabled);
+  document.getElementById('btn-add').disabled = !nextTeam;
+
+  if (!active.length) {
+    grid.innerHTML = '<div class="empty-state" id="empty-msg">No teams added — press + Add Team to begin</div>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  active.forEach(name => {
+    const t     = T[key(name)] || {};
+    const hints = t.hintsUsed     || 0;
+    const wrong = t.wrongAttempts || 0;
+    const done  = !!t.completed;
+    const locked = !!(t.lockoutUntil && Date.now() < t.lockoutUntil);
+
+    const master = (S.isRunning && S.startedAt)
+      ? (S.isPaused ? (S.pausedElapsed||0) : Date.now()-S.startedAt)
+      : 0;
+    const adj = (done && t.adjustedCompletionMs!=null) ? t.adjustedCompletionMs
+              : master + hints*60000 + wrong*30000;
+
+    const m  = Math.floor(adj/60000).toString().padStart(2,'0');
+    const s  = Math.floor((adj%60000)/1000).toString().padStart(2,'0');
+    const ms = (adj%1000).toString().padStart(3,'0');
+    const timeCls = done ? 'done' : (adj>master ? 'pen' : '');
+
+    let badge;
+    if (done)          badge = '<span class="tc-status st-done">Disarmed</span>';
+    else if (locked)   badge = '<span class="tc-status st-lock">Locked</span>';
+    else if (t.loggedIn) badge = '<span class="tc-status st-on">Active</span>';
+    else               badge = '<span class="tc-status st-wait">Waiting</span>';
+
+    const card = document.createElement('div');
+    card.className = 'team-card' + (done?' done':t.loggedIn?' active':'');
+    card.innerHTML =
+      '<div class="tc-head"><div class="tc-name">'+name+'</div>'+badge+'</div>' +
+      '<div class="tc-timer-wrap">' +
+        '<div class="tc-timer '+timeCls+'" '+(done?'':'data-teamclock="'+name+'"')+'>' +
+          '<span class="tc-time-main">'+m+':'+s+'</span>' +
+          '<span class="tc-ms"><span class="tc-time-ms">'+ms+'</span></span>' +
+        '</div>' +
+        '<div class="tc-timer-label">'+(done?'Final time':'Live adjusted time')+'</div>' +
+      '</div>' +
+      '<div class="tc-hints">' +
+        '<button class="hint-btn'+(hints>=1?' used':'')+(done?' disabled-btn':'')+'" onclick="addHint(\''+name+'\',1)" '+(hints>=1||done?'disabled':'')+'>H1</button>' +
+        '<button class="hint-btn'+(hints>=2?' used':'')+(done?' disabled-btn':'')+'" onclick="addHint(\''+name+'\',2)" '+(hints>=2||done?'disabled':'')+'>H2</button>' +
+        '<button class="hint-btn'+(hints>=3?' used':'')+(done?' disabled-btn':'')+'" onclick="addHint(\''+name+'\',3)" '+(hints>=3||done?'disabled':'')+'>H3</button>' +
+      '</div>' +
+      '<div class="tc-foot"><button class="tc-remove" onclick="removeTeam(\''+name+'\')">Remove</button></div>';
+
+    grid.appendChild(card);
+  });
+}
+
+function key(n) { return n.replace(/ /g,'_'); }
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+</script>
+</body>
+</html>
