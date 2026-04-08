@@ -1,865 +1,355 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SHADE Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-:root {
-  --bg:        #f0f2f4;
-  --white:     #ffffff;
-  --border:    #dde0e4;
-  --border2:   #c4c8ce;
-  --text:      #111318;
-  --muted:     #5a6170;
-  --subtle:    #9aa0ab;
-  --navy:      #1a2035;
-  --navy2:     #263048;
-  --gold:      #c9a84c;
-  --gold-lt:   #fdf6e3;
-  --red:       #dc2626;
-  --red-bg:    #fef2f2;
-  --red-bdr:   #fca5a5;
-  --green:     #16a34a;
-  --green-bg:  #f0fdf4;
-  --green-bdr: #86efac;
-  --blue:      #1d4ed8;
-  --blue-bg:   #eff6ff;
-  --blue-bdr:  #93c5fd;
-  --amber:     #b45309;
-  --amber-bg:  #fffbeb;
-  --amber-bdr: #fcd34d;
-  --mono: 'Courier Prime', monospace;
-  --sans: 'Oswald', sans-serif;
-}
-html, body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SHADE - Admin Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Oswald', sans-serif;
+      background: #000;
+      color: #f0ece0;
+      padding: 40px 24px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
 
-/* ═══════════════════════════
-   HEADER
-═══════════════════════════ */
-.header {
-  background:var(--navy);
-  padding:0 24px;
-  height:60px;
-  display:flex;
-  align-items:center;
-  gap:20px;
-  position:sticky;
-  top:0;
-  z-index:50;
-}
-.header-brand {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-shrink:0;
-}
-.header-brand img { width:30px; height:30px; object-fit:contain; opacity:0.9; }
-.header-brand-text { font-size:17px; font-weight:600; letter-spacing:0.2em; color:#fff; }
-.header-brand-sub {
-  font-family:var(--mono); font-size:8px; letter-spacing:0.15em;
-  color:var(--gold); text-transform:uppercase; margin-top:1px;
-}
+    h1 {
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
 
-.header-sep { width:1px; height:32px; background:rgba(255,255,255,0.1); flex-shrink:0; }
+    .subtitle {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #c9a84c;
+      margin-bottom: 40px;
+    }
 
-.header-timer {
-  font-family:var(--mono); font-size:24px; font-weight:700;
-  color:#fff; letter-spacing:0.06em; min-width:120px;
-}
-.header-timer.running { color:#4ade80; }
-.header-timer.paused  { color:var(--gold); }
+    .section {
+      margin-bottom: 48px;
+      border: 1px solid #222;
+      padding: 24px;
+      background: #0a0a0a;
+    }
 
-.header-btns { display:flex; gap:8px; }
-.hbtn {
-  font-family:var(--sans); font-size:12px; font-weight:600;
-  letter-spacing:0.05em; padding:8px 14px; border-radius:5px;
-  border:none; cursor:pointer; white-space:nowrap; transition:all 0.1s;
-}
-.hbtn:disabled { opacity:0.3; cursor:not-allowed; }
-.hbtn-start  { background:#fff; color:var(--navy); }
-.hbtn-start:not(:disabled):hover { background:#e8eaf0; }
-.hbtn-pause  { background:rgba(255,255,255,0.1); color:#ccc; border:1px solid rgba(255,255,255,0.15); }
-.hbtn-pause:not(:disabled):hover { background:rgba(255,255,255,0.15); }
-.hbtn-reset  { background:rgba(220,38,38,0.15); color:#f87171; border:1px solid rgba(220,38,38,0.3); }
-.hbtn-reset:not(:disabled):hover { background:rgba(220,38,38,0.2); }
+    .section h2 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      color: #c9a84c;
+    }
 
-/* ═══════════════════════════
-   MAIN LAYOUT
-═══════════════════════════ */
-.main {
-  max-width:980px;
-  margin:0 auto;
-  padding:28px 20px;
-  display:flex;
-  flex-direction:column;
-  gap:24px;
-}
+    .control-group {
+      margin-bottom: 16px;
+    }
 
-/* ═══════════════════════════
-   TOP ROW: CODE + ADD TEAM
-═══════════════════════════ */
-.top-row {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-}
-@media (max-width:600px) { .top-row { grid-template-columns:1fr; } }
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 6px;
+    }
 
-.panel {
-  background:var(--white);
-  border:1px solid var(--border);
-  border-radius:8px;
-  overflow:hidden;
-}
-.panel-head {
-  background:#f8f9fb;
-  border-bottom:1px solid var(--border);
-  padding:12px 18px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.panel-title {
-  font-size:13px; font-weight:600;
-  letter-spacing:0.06em; text-transform:uppercase;
-  color:var(--text);
-}
-.panel-sub {
-  font-family:var(--mono); font-size:9px;
-  letter-spacing:0.12em; color:var(--subtle); text-transform:uppercase;
-}
-.panel-body { padding:18px; }
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 12px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #f0ece0;
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      border-radius: 2px;
+      margin-bottom: 8px;
+    }
 
-/* Code input */
-.code-entry {
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.code-digits {
-  display:flex;
-  gap:8px;
-}
-.code-digit {
-  width:52px; height:60px;
-  background:#f0f2f4;
-  border:2px solid var(--border);
-  border-radius:6px;
-  font-family:var(--mono);
-  font-size:28px; font-weight:700;
-  text-align:center;
-  color:var(--navy);
-  caret-color:var(--navy);
-  transition:border-color 0.15s;
-}
-.code-digit:focus { outline:none; border-color:var(--navy); background:#fff; }
-.code-digit.set   { border-color:var(--navy2); background:#fff; }
-.code-set-btn {
-  font-family:var(--sans); font-size:13px; font-weight:600;
-  letter-spacing:0.05em; padding:12px 20px;
-  background:var(--navy); color:#fff;
-  border:none; border-radius:6px; cursor:pointer;
-  transition:background 0.1s; white-space:nowrap;
-}
-.code-set-btn:hover { background:var(--navy2); }
-.code-status {
-  font-family:var(--mono); font-size:10px;
-  letter-spacing:0.1em; color:var(--green);
-  text-transform:uppercase; margin-top:8px;
-  min-height:16px;
-}
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #c9a84c;
+    }
 
-/* Add/remove teams */
-.team-pills {
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-.team-pill {
-  font-family:var(--sans); font-size:12px; font-weight:600;
-  letter-spacing:0.06em; padding:7px 14px;
-  border-radius:5px; border:1.5px solid var(--border);
-  background:var(--bg); color:var(--muted);
-  cursor:pointer; transition:all 0.12s;
-  user-select:none;
-}
-.team-pill:hover { border-color:var(--border2); color:var(--text); }
-.team-pill.active {
-  background:var(--navy); color:#fff; border-color:var(--navy);
-}
+    .btn {
+      padding: 12px 24px;
+      background: transparent;
+      border: 1px solid #333;
+      color: #f0ece0;
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.15s;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
 
-/* ═══════════════════════════
-   ACTIVE TEAMS TABLE
-═══════════════════════════ */
-.teams-panel {
-  background:var(--white);
-  border:1px solid var(--border);
-  border-radius:8px;
-  overflow:hidden;
-}
-.teams-panel-head {
-  background:#f8f9fb;
-  border-bottom:1px solid var(--border);
-  padding:14px 20px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.teams-panel-title {
-  font-size:14px; font-weight:600;
-  letter-spacing:0.06em; color:var(--text);
-}
-.teams-count {
-  font-family:var(--mono); font-size:10px;
-  letter-spacing:0.12em; color:var(--subtle);
-  text-transform:uppercase;
-}
+    .btn:active {
+      border-color: #c9a84c;
+      color: #c9a84c;
+    }
 
-.team-row {
-  display:grid;
-  grid-template-columns: 110px 1fr auto auto 110px 40px;
-  align-items:center;
-  padding:16px 20px;
-  border-bottom:1px solid var(--border);
-  gap:16px;
-}
-.team-row:last-child { border-bottom:none; }
-.team-row:hover { background:#fafbfc; }
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
 
-/* Team name */
-.tr-name {
-  font-size:15px; font-weight:600;
-  letter-spacing:0.08em; color:var(--text);
-}
+    .btn-primary {
+      border-color: #c9a84c;
+      color: #c9a84c;
+    }
 
-/* Status */
-.tr-status {
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.status-pill {
-  display:inline-flex; align-items:center; gap:5px;
-  font-family:var(--mono); font-size:9px; letter-spacing:0.1em;
-  text-transform:uppercase; padding:4px 10px;
-  border-radius:20px; border:1px solid; white-space:nowrap;
-}
-.sp-wait  { color:var(--subtle); border-color:var(--border); background:var(--bg); }
-.sp-on    { color:var(--blue);   border-color:var(--blue-bdr); background:var(--blue-bg); }
-.sp-lock  { color:var(--red);    border-color:var(--red-bdr);  background:var(--red-bg); }
-.sp-done  { color:var(--green);  border-color:var(--green-bdr);background:var(--green-bg); }
-.sdot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
-.sp-on   .sdot { background:var(--blue); }
-.sp-lock .sdot { background:var(--red); animation:blink 0.7s infinite; }
-.sp-done .sdot { background:var(--green); }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.1} }
+    .btn-primary:active {
+      background: rgba(201, 168, 76, 0.1);
+    }
 
-/* HINT BUTTONS H1 H2 H3 */
-.tr-hints {
-  display:flex;
-  gap:6px;
-  align-items:center;
-}
-.hint-btn {
-  width:40px; height:36px;
-  font-family:var(--sans); font-size:13px; font-weight:600;
-  letter-spacing:0.04em;
-  border-radius:5px;
-  border:1.5px solid var(--amber-bdr);
-  background:var(--bg);
-  color:var(--subtle);
-  cursor:pointer;
-  transition:all 0.12s;
-  display:flex; align-items:center; justify-content:center;
-}
-.hint-btn:hover:not(:disabled):not(.used) {
-  border-color:var(--amber);
-  color:var(--amber);
-  background:var(--amber-bg);
-}
-.hint-btn.used {
-  background:var(--amber-bg);
-  border-color:var(--amber);
-  color:var(--amber);
-  font-weight:700;
-}
-.hint-btn:disabled {
-  opacity:0.35;
-  cursor:not-allowed;
-}
+    .team-list {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      width: 100%;
+    }
 
-/* Wrong count */
-.tr-wrong {
-  text-align:center;
-}
-.wrong-num {
-  font-family:var(--mono); font-size:16px; font-weight:700;
-  color:var(--subtle);
-}
-.wrong-num.has { color:var(--red); }
-.wrong-label {
-  font-family:var(--mono); font-size:8px; letter-spacing:0.1em;
-  color:var(--subtle); text-transform:uppercase; margin-top:1px;
-}
+    @media (max-width: 600px) {
+      .team-list {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
 
-/* Adj time */
-.tr-time {
-  text-align:right;
-}
-.adj-time {
-  font-family:var(--mono); font-size:16px; font-weight:700;
-  color:var(--text);
-}
-.adj-time.penalised { color:var(--red); }
-.adj-time.done      { color:var(--green); }
-.adj-label {
-  font-family:var(--mono); font-size:8px; letter-spacing:0.1em;
-  color:var(--subtle); text-transform:uppercase; margin-top:1px;
-}
+    @media (max-width: 400px) {
+      .team-list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
 
-/* Remove btn */
-.tr-remove {
-  width:32px; height:32px;
-  background:transparent;
-  border:1px solid var(--border);
-  border-radius:5px;
-  color:var(--subtle);
-  font-size:14px; line-height:1;
-  cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  transition:all 0.1s;
-}
-.tr-remove:hover { border-color:var(--red-bdr); color:var(--red); background:var(--red-bg); }
+    .team-item {
+      padding: 16px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 2px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
 
-/* Empty */
-.teams-empty {
-  padding:36px 20px;
-  text-align:center;
-  font-family:var(--mono); font-size:11px;
-  letter-spacing:0.15em; color:var(--subtle);
-  text-transform:uppercase;
-}
+    .team-item:active {
+      border-color: #c9a84c;
+      background: rgba(201, 168, 76, 0.1);
+    }
 
-/* Column headers */
-.team-row-head {
-  display:grid;
-  grid-template-columns: 110px 1fr auto auto 110px 40px;
-  padding:8px 20px;
-  border-bottom:1px solid var(--border);
-  background:#f8f9fb;
-  gap:16px;
-}
-.th {
-  font-family:var(--mono); font-size:8px; letter-spacing:0.15em;
-  text-transform:uppercase; color:var(--subtle);
-}
-.th-right { text-align:right; }
+    .team-item.active {
+      border-color: #c9a84c;
+      color: #c9a84c;
+    }
 
-/* ═══════════════════════════
-   RESULTS
-═══════════════════════════ */
-.results-wrap { overflow-x:auto; }
-.results-table { width:100%; border-collapse:collapse; }
-.results-table th {
-  padding:10px 20px;
-  font-family:var(--mono); font-size:8px; letter-spacing:0.15em;
-  text-transform:uppercase; color:var(--subtle);
-  text-align:left; border-bottom:1px solid var(--border);
-  background:#f8f9fb;
-}
-.results-table td {
-  padding:13px 20px;
-  border-bottom:1px solid var(--border);
-  font-family:var(--mono); font-size:13px;
-  color:var(--muted);
-}
-.results-table tr:last-child td { border-bottom:none; }
-.results-table tr.rdone td { color:var(--text); }
-.r-rank  { font-size:20px; font-weight:700; color:var(--gold); }
-.r-name  { font-weight:700; letter-spacing:0.06em; font-family:var(--sans); font-size:14px; }
-.r-time  { color:var(--green); font-weight:700; font-size:15px; }
-.r-btn {
-  font-family:var(--sans); font-size:10px; font-weight:600;
-  letter-spacing:0.05em; padding:5px 10px;
-  background:transparent; border:1px solid var(--border);
-  border-radius:4px; color:var(--muted);
-  cursor:pointer; transition:all 0.1s;
-}
-.r-btn:hover { border-color:var(--border2); color:var(--text); }
+    .status {
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      color: #555;
+      margin-top: 12px;
+      padding: 12px;
+      background: #0a0a0a;
+      border: 1px solid #222;
+      border-radius: 2px;
+    }
 
-/* Toast */
-.toast {
-  position:fixed; bottom:20px; right:20px;
-  background:var(--navy); color:#fff;
-  font-family:var(--mono); font-size:12px; letter-spacing:0.08em;
-  padding:11px 18px; border-radius:6px;
-  z-index:100; opacity:0; transform:translateY(5px);
-  transition:all 0.2s; pointer-events:none;
-}
-.toast.show { opacity:1; transform:translateY(0); }
-</style>
+    .status.active {
+      color: #c9a84c;
+      border-color: #c9a84c;
+    }
+
+    .timer-display {
+      font-family: 'Courier Prime', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      text-align: center;
+      margin: 20px 0;
+      color: #c9a84c;
+      letter-spacing: 0.1em;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      body { padding: 24px 16px; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="header-brand">
-    <img src="assets/img/shade-seal.png" alt="SHADE">
-    <div>
-      <div class="header-brand-text">SHADE</div>
-      <div class="header-brand-sub">Admin Panel</div>
-    </div>
-  </div>
+<h1>SHADE Admin</h1>
+<p class="subtitle">Control Terminal</p>
 
-  <div class="header-sep"></div>
-  <div class="header-timer" id="header-timer">00:00:00</div>
-
-  <div class="header-btns">
-    <button class="hbtn hbtn-start" id="btn-start" onclick="startSession()">▶ Start</button>
-    <button class="hbtn hbtn-pause" id="btn-pause" onclick="togglePause()" disabled>⏸ Pause</button>
-    <button class="hbtn hbtn-reset" id="btn-reset" onclick="confirmReset()">↺ Reset</button>
+<!-- TIMER SECTION -->
+<div class="section">
+  <h2>Universal Timer</h2>
+  <div class="timer-display" id="timerDisplay">00:00</div>
+  <div class="grid-2">
+    <button class="btn btn-primary" onclick="startTimer()">Start</button>
+    <button class="btn" onclick="stopTimer()">Stop</button>
   </div>
+  <div class="status" id="timerStatus">Stopped</div>
 </div>
 
-<!-- MAIN -->
-<div class="main">
-
-  <!-- TOP ROW: CODE + ADD TEAMS -->
-  <div class="top-row">
-
-    <!-- DISARM CODE -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">Disarm Code</div>
-        <div class="panel-sub">4-digit · all teams</div>
-      </div>
-      <div class="panel-body">
-        <div class="code-entry">
-          <div class="code-digits">
-            <input class="code-digit" id="cd0" type="tel" maxlength="1" inputmode="numeric"
-                   onkeypress="return /[0-9]/.test(event.key)"
-                   oninput="codeDigitInput(0,this)" onkeydown="codeDigitKey(0,event)">
-            <input class="code-digit" id="cd1" type="tel" maxlength="1" inputmode="numeric"
-                   onkeypress="return /[0-9]/.test(event.key)"
-                   oninput="codeDigitInput(1,this)" onkeydown="codeDigitKey(1,event)">
-            <input class="code-digit" id="cd2" type="tel" maxlength="1" inputmode="numeric"
-                   onkeypress="return /[0-9]/.test(event.key)"
-                   oninput="codeDigitInput(2,this)" onkeydown="codeDigitKey(2,event)">
-            <input class="code-digit" id="cd3" type="tel" maxlength="1" inputmode="numeric"
-                   onkeypress="return /[0-9]/.test(event.key)"
-                   oninput="codeDigitInput(3,this)" onkeydown="codeDigitKey(3,event)">
-          </div>
-          <button class="code-set-btn" onclick="saveCode()">Set Code</button>
-        </div>
-        <div class="code-status" id="code-status"></div>
-      </div>
-    </div>
-
-    <!-- ADD / REMOVE TEAMS -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">Teams</div>
-        <div class="panel-sub" id="team-count-sub">0 active</div>
-      </div>
-      <div class="panel-body" style="display:flex; flex-direction:column; gap:10px;">
-        <div id="active-team-tags" style="display:flex; flex-wrap:wrap; gap:8px; min-height:36px;"></div>
-        <button onclick="addNextTeam()" id="btn-add-team" style="
-          background:var(--navy); color:#fff; border:none; border-radius:6px;
-          font-family:var(--sans); font-size:15px; font-weight:600;
-          letter-spacing:0.05em; padding:12px 20px; cursor:pointer; width:100%;
-        ">+ Add Team</button>
-      </div>
-    </div>
-
+<!-- DISARM CODE -->
+<div class="section">
+  <h2>Disarm Code</h2>
+  <div class="control-group">
+    <label>4-Digit Code</label>
+    <input type="text" id="codeInput" placeholder="0000" maxlength="4">
+    <button class="btn btn-primary" onclick="saveCode()">Set Code</button>
   </div>
-
-  <!-- ACTIVE TEAMS -->
-  <div class="teams-panel">
-    <div class="teams-panel-head">
-      <div class="teams-panel-title">Active Teams</div>
-      <div class="teams-count" id="teams-count">0 teams</div>
-    </div>
-    <div class="team-row-head">
-      <div class="th">Team</div>
-      <div class="th">Status</div>
-      <div class="th">Hints</div>
-      <div class="th" style="text-align:center">Wrong</div>
-      <div class="th th-right">Adj. Time</div>
-      <div class="th"></div>
-    </div>
-    <div id="team-list">
-      <div class="teams-empty">No teams added — tap a team above to add</div>
-    </div>
-  </div>
-
-  <!-- RESULTS -->
-  <div class="panel">
-    <div class="panel-head">
-      <div class="panel-title">Results</div>
-      <button class="r-btn" onclick="toggleSort()">Sort by Time</button>
-    </div>
-    <div class="results-wrap">
-      <table class="results-table">
-        <thead>
-          <tr>
-            <th style="width:48px">#</th>
-            <th>Team</th>
-            <th>Hints</th>
-            <th>Wrong</th>
-            <th>Penalty</th>
-            <th>Final Time</th>
-          </tr>
-        </thead>
-        <tbody id="results-body">
-          <tr><td colspan="6" style="text-align:center;color:var(--subtle);padding:24px;font-family:var(--mono);font-size:11px;">No completions yet</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
+  <div class="status" id="codeStatus">Code: 0000</div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- TEAMS -->
+<div class="section">
+  <h2>Enable Teams</h2>
+  <div class="team-list" id="teamList"></div>
+</div>
 
-<!-- Firebase -->
-<script src="assets/js/firebase-config.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- TEAM STATUS -->
+<div class="section">
+  <h2>Team Status</h2>
+  <div id="teamStatus" style="font-family: 'Courier Prime', monospace; font-size: 11px; color: #888; line-height: 1.8;"></div>
+</div>
+
 <script>
-firebase.initializeApp(SHADE_FIREBASE_CONFIG);
-const db         = firebase.database();
-const sessionRef = db.ref('shade/session');
-const teamsRef   = db.ref('shade/teams');
+const TEAMS = ['TEAM 1', 'TEAM 2', 'TEAM 3', 'TEAM 4', 'TEAM 5', 'TEAM 6', 'TEAM 7', 'TEAM 8', 'TEAM 9', 'TEAM 10', 'TEAM 11', 'TEAM 12'];
+let gameState = {
+  timerRunning: false,
+  timerStart: 0,
+  code: '0000',
+  enabledTeams: new Set(['TEAM 1', 'TEAM 2']),
+  teams: {}
+};
 
-const ALL_TEAMS = Array.from({length:12}, (_,i) => `TEAM ${i+1}`);
-let session  = { isRunning:false, isPaused:false, startedAt:null, pausedElapsed:0, code:'' };
-let teams    = {};
-let timerInt = null;
-let sortByTime = false;
-
-/* ── FIREBASE ── */
-sessionRef.on('value', snap => {
-  session = { ...session, ...(snap.val()||{}) };
-  updateHeaderUI();
-  if (session.isRunning && !session.isPaused) startTick();
-  // Populate code digits if set
-  if (session.code && session.code.length === 4) {
-    session.code.split('').forEach((d,i) => {
-      const el = document.getElementById('cd'+i);
-      if (el && !el.value) { el.value = d; el.classList.add('set'); }
-    });
-  }
+TEAMS.forEach(t => {
+  gameState.teams[t] = { enabled: false, completed: false, hints: 0, locked: false, lockoutEnd: 0 };
 });
 
-teamsRef.on('value', snap => {
-  teams = snap.val() || {};
-  renderTeamTags();
-  renderTeams();
-  renderResults();
-});
-
-/* ── TIMER ── */
-function startTick() {
-  clearInterval(timerInt);
-  timerInt = setInterval(() => {
-    if (!session.isRunning || session.isPaused || !session.startedAt) return;
-    const el = Date.now() - session.startedAt;
-    document.getElementById('header-timer').textContent = fmtTime(el);
-    document.querySelectorAll('[data-adjtime]').forEach(el2 => {
-      const name = el2.dataset.adjtime;
-      const t = teams[tkey(name)];
-      if (!t || t.completed) return;
-      const adj = el + (t.hintsUsed||0)*60000 + (t.wrongAttempts||0)*30000;
-      el2.textContent = fmtTime(adj);
-      el2.className = 'adj-time' + (((t.hintsUsed||0)+(t.wrongAttempts||0))>0?' penalised':'');
-    });
-  }, 100);
+// Load from localStorage
+function load() {
+  const saved = localStorage.getItem('shade-admin');
+  if (saved) gameState = JSON.parse(saved);
+  else gameState.enabledTeams = new Set(['TEAM 1', 'TEAM 2']);
+  gameState.enabledTeams = new Set(gameState.enabledTeams);
 }
 
-/* ── SESSION ── */
-function startSession() {
-  sessionRef.update({ isRunning:true, isPaused:false, startedAt:Date.now(), pausedElapsed:0 });
-  toast('Session started');
+function save() {
+  const toSave = {...gameState, enabledTeams: Array.from(gameState.enabledTeams)};
+  localStorage.setItem('shade-admin', JSON.stringify(toSave));
 }
 
-function togglePause() {
-  if (!session.isPaused) {
-    const elapsed = Date.now() - session.startedAt;
-    sessionRef.update({ isPaused:true, pausedElapsed:elapsed });
-    clearInterval(timerInt);
-    toast('Paused');
-  } else {
-    const newStart = Date.now() - (session.pausedElapsed||0);
-    sessionRef.update({ isPaused:false, startedAt:newStart });
-    startTick();
-    toast('Resumed');
-  }
+function startTimer() {
+  gameState.timerRunning = true;
+  gameState.timerStart = Date.now();
+  save();
+  updateTimer();
 }
 
-function confirmReset() {
-  if (!confirm('Reset session? All team progress will be cleared.')) return;
-  clearInterval(timerInt);
-  sessionRef.update({ isRunning:false, isPaused:false, startedAt:null, pausedElapsed:0 });
-  const updates = {};
-  ALL_TEAMS.forEach(name => {
-    const k = tkey(name);
-    if (teams[k]) updates[k] = { ...teams[k],
-      loggedIn:false, hintsUsed:0, wrongAttempts:0,
-      lockoutUntil:null, completed:false, completedAt:null, adjustedCompletionMs:null
-    };
-  });
-  if (Object.keys(updates).length) teamsRef.update(updates);
-  document.getElementById('header-timer').textContent = '00:00:00';
-  document.getElementById('header-timer').className = 'header-timer';
-  toast('Session reset');
+function stopTimer() {
+  gameState.timerRunning = false;
+  save();
 }
 
-function updateHeaderUI() {
-  const timer = document.getElementById('header-timer');
-  const bs    = document.getElementById('btn-start');
-  const bp    = document.getElementById('btn-pause');
-  if (session.isRunning && !session.isPaused) {
-    timer.className = 'header-timer running';
-    bs.disabled = true; bp.disabled = false; bp.textContent = '⏸ Pause';
-    startTick();
-  } else if (session.isPaused) {
-    timer.className = 'header-timer paused';
-    if (session.pausedElapsed) timer.textContent = fmtTime(session.pausedElapsed);
-    bs.disabled = true; bp.disabled = false; bp.textContent = '▶ Resume';
-  } else {
-    timer.className = 'header-timer';
-    bs.disabled = false; bp.disabled = true; bp.textContent = '⏸ Pause';
-  }
-}
-
-/* ── CODE DIGITS ── */
-function codeDigitInput(i, el) {
-  el.value = el.value.replace(/\D/g,'').slice(-1);
-  el.classList.toggle('set', el.value !== '');
-  if (el.value && i < 3) document.getElementById('cd'+(i+1)).focus();
-  document.getElementById('code-status').textContent = '';
-}
-function codeDigitKey(i, e) {
-  if (e.key === 'Backspace' && !document.getElementById('cd'+i).value && i > 0) {
-    document.getElementById('cd'+(i-1)).focus();
-  }
-  if (e.key === 'Enter') saveCode();
-}
 function saveCode() {
-  const code = [0,1,2,3].map(i => document.getElementById('cd'+i).value).join('');
-  if (code.length !== 4) {
-    document.getElementById('code-status').style.color = 'var(--red)';
-    document.getElementById('code-status').textContent = 'Enter all 4 digits';
-    return;
+  const code = document.getElementById('codeInput').value;
+  if (code.length === 4 && /^\d{4}$/.test(code)) {
+    gameState.code = code;
+    save();
+    document.getElementById('codeStatus').textContent = `Code: ${code}`;
   }
-  sessionRef.update({ code });
-  document.getElementById('code-status').style.color = 'var(--green)';
-  document.getElementById('code-status').textContent = `Code set: ${code}`;
-  toast(`Disarm code set to ${code}`);
 }
 
-/* ── TEAM ADD/REMOVE ── */
-function renderTeamTags() {
-  const active = ALL_TEAMS.filter(n => (teams[tkey(n)]||{}).enabled);
-  const tags   = document.getElementById('active-team-tags');
-  const btn    = document.getElementById('btn-add-team');
-  const sub    = document.getElementById('team-count-sub');
-
-  sub.textContent = active.length + ' active';
-  btn.disabled    = active.length >= 12;
-  btn.style.opacity = btn.disabled ? '0.35' : '1';
-
-  tags.innerHTML = '';
-  active.forEach(name => {
-    const tag = document.createElement('div');
-    tag.style.cssText = `
-      display:inline-flex; align-items:center; gap:8px;
-      background:var(--navy); color:#fff;
-      font-family:var(--sans); font-size:13px; font-weight:600;
-      letter-spacing:0.06em; padding:7px 12px;
-      border-radius:5px;
-    `;
-    tag.innerHTML = `
-      ${name}
-      <button onclick="removeTeam('${name}')" style="
-        background:rgba(255,255,255,0.15); border:none; border-radius:3px;
-        color:#fff; font-size:11px; padding:1px 6px; cursor:pointer;
-        line-height:1.4; font-family:var(--sans);
-      ">✕</button>
-    `;
-    tags.appendChild(tag);
-  });
+function toggleTeam(team) {
+  if (gameState.enabledTeams.has(team)) {
+    gameState.enabledTeams.delete(team);
+  } else {
+    gameState.enabledTeams.add(team);
+  }
+  save();
+  renderTeams();
 }
 
-function addNextTeam() {
-  const active = ALL_TEAMS.filter(n => (teams[tkey(n)]||{}).enabled);
-  const next   = ALL_TEAMS.find(n => !(teams[tkey(n)]||{}).enabled);
-  if (!next) return;
-  teamsRef.child(tkey(next)).set({
-    teamName:next, enabled:true, loggedIn:false,
-    hintsUsed:0, wrongAttempts:0, lockoutUntil:null,
-    completed:false, completedAt:null, adjustedCompletionMs:null
-  });
-  toast(next + ' added');
-}
-
-function removeTeam(name) {
-  if (!confirm(`Remove ${name}?`)) return;
-  teamsRef.child(tkey(name)).update({ enabled:false, loggedIn:false });
-  toast(name + ' removed');
-}
-
-/* ── TEAMS TABLE ── */
 function renderTeams() {
-  const list   = document.getElementById('team-list');
-  const active = ALL_TEAMS.filter(n => (teams[tkey(n)]||{}).enabled);
-  document.getElementById('teams-count').textContent = active.length + ' team' + (active.length===1?'':'s');
+  const list = document.getElementById('teamList');
+  list.innerHTML = TEAMS.map(t => `
+    <div class="team-item ${gameState.enabledTeams.has(t) ? 'active' : ''}" onclick="toggleTeam('${t}')">
+      ${t}
+    </div>
+  `).join('');
+}
 
-  if (!active.length) {
-    list.innerHTML = '<div class="teams-empty">No teams added — tap a team above to add</div>';
-    return;
+function updateTimer() {
+  const display = document.getElementById('timerDisplay');
+  const status = document.getElementById('timerStatus');
+  
+  if (gameState.timerRunning) {
+    const elapsed = Math.floor((Date.now() - gameState.timerStart) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+    display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    status.classList.add('active');
+    status.textContent = 'Running';
+    requestAnimationFrame(updateTimer);
+  } else {
+    display.textContent = '00:00';
+    status.classList.remove('active');
+    status.textContent = 'Stopped';
   }
+}
 
-  list.innerHTML = '';
-  active.forEach(name => {
-    const t     = teams[tkey(name)] || {};
-    const hints = t.hintsUsed || 0;
-    const wrong = t.wrongAttempts || 0;
-    const done  = t.completed;
-    const locked = t.lockoutUntil && Date.now() < t.lockoutUntil;
-
-    // Status
-    let sPill;
-    if (done)         sPill = `<span class="status-pill sp-done"><span class="sdot"></span>Disarmed</span>`;
-    else if (locked)  sPill = `<span class="status-pill sp-lock"><span class="sdot"></span>Locked</span>`;
-    else if (t.loggedIn) sPill = `<span class="status-pill sp-on"><span class="sdot"></span>Active</span>`;
-    else              sPill = `<span class="status-pill sp-wait">Waiting</span>`;
-
-    // Adj time
-    const elapsed = session.isRunning && session.startedAt
-      ? (session.isPaused ? (session.pausedElapsed||0) : Date.now() - session.startedAt)
-      : 0;
-    const adjMs = (done && t.adjustedCompletionMs != null) ? t.adjustedCompletionMs : elapsed + hints*60000 + wrong*30000;
-    const tClass = done ? 'done' : ((hints>0||wrong>0) ? 'penalised' : '');
-
-    const row = document.createElement('div');
-    row.className = 'team-row';
-    row.innerHTML = `
-      <div class="tr-name">${name}</div>
-
-      <div class="tr-status">${sPill}</div>
-
-      <div class="tr-hints">
-        <button class="hint-btn ${hints>=1?'used':''}"
-                onclick="setHint('${name}',1)"
-                ${done||hints>=1?'disabled':''}>H1</button>
-        <button class="hint-btn ${hints>=2?'used':''}"
-                onclick="setHint('${name}',2)"
-                ${done||hints<1||hints>=2?'disabled':''}>H2</button>
-        <button class="hint-btn ${hints>=3?'used':''}"
-                onclick="setHint('${name}',3)"
-                ${done||hints<2||hints>=3?'disabled':''}>H3</button>
-      </div>
-
-      <div class="tr-wrong">
-        <div class="wrong-num ${wrong>0?'has':''}">${wrong}</div>
-        <div class="wrong-label">wrong</div>
-      </div>
-
-      <div class="tr-time">
-        <div class="adj-time ${tClass}" data-adjtime="${!done?name:''}">${fmtTime(adjMs)}</div>
-        <div class="adj-label">${done?'final time':'hidden time'}</div>
-      </div>
-
-      <button class="tr-remove" onclick="removeTeam('${name}')" title="Remove team">✕</button>
-    `;
-    list.appendChild(row);
+function updateTeamStatus() {
+  const status = document.getElementById('teamStatus');
+  let html = '';
+  TEAMS.forEach(t => {
+    const team = gameState.teams[t];
+    const enabled = gameState.enabledTeams.has(t) ? '✓' : ' ';
+    html += `[${enabled}] ${t} | Completed: ${team.completed ? 'YES' : 'NO'} | Hints: ${team.hints}/3<br>`;
   });
+  status.innerHTML = html;
 }
 
-/* ── RESULTS ── */
-function renderResults() {
-  const tbody = document.getElementById('results-body');
-  let rows = ALL_TEAMS
-    .filter(n => (teams[tkey(n)]||{}).enabled)
-    .map(n => ({ name:n, t:teams[tkey(n)]||{} }));
+// Sync admin pages
+window.addEventListener('storage', () => {
+  load();
+  renderTeams();
+  updateTeamStatus();
+});
 
-  if (sortByTime) {
-    rows.sort((a,b) => {
-      const am = a.t.adjustedCompletionMs, bm = b.t.adjustedCompletionMs;
-      if (am && bm) return am-bm;
-      if (am) return -1; if (bm) return 1; return 0;
-    });
-  }
-
-  const done = rows.filter(r => r.t.completed);
-  if (!done.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--subtle);padding:24px;font-family:var(--mono);font-size:11px;">No completions yet</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = '';
-  let rank = 1;
-  rows.forEach(r => {
-    const t = r.t;
-    const h = t.hintsUsed||0, w = t.wrongAttempts||0;
-    const pen = h*60 + w*30;
-    const tr = document.createElement('tr');
-    if (t.completed) {
-      tr.className = 'rdone';
-      tr.innerHTML = `
-        <td class="r-rank">${rank++}</td>
-        <td class="r-name">${r.name}</td>
-        <td>${h}/3</td>
-        <td>${w}</td>
-        <td style="color:${pen>0?'var(--red)':'var(--subtle)'}">${pen>0?'+'+pen+'s':'—'}</td>
-        <td class="r-time">${t.adjustedCompletionMs?fmtTime(t.adjustedCompletionMs):'—'}</td>
-      `;
-    } else {
-      tr.innerHTML = `<td>—</td><td class="r-name" style="color:var(--subtle)">${r.name}</td><td>—</td><td>—</td><td>—</td><td>—</td>`;
-    }
-    tbody.appendChild(tr);
-  });
-}
-
-function toggleSort() { sortByTime = !sortByTime; renderResults(); }
-
-
-
-function removeTeam(name) {
-  if (!confirm(`Remove ${name} from this session?`)) return;
-  teamsRef.child(tkey(name)).update({ enabled:false, loggedIn:false });
-  toast(name + ' removed');
-}
-
-function setHint(name, level) {
-  // H1, H2, H3 are sequential — clicking H2 sets hintsUsed to 2
-  const k = tkey(name);
-  teamsRef.child(k).update({ hintsUsed: level });
-  toast(`H${level} hint added to ${name} (+${level*60}s total)`);
-}
-
-/* ── HELPERS ── */
-function tkey(n)  { return n.replace(/ /g,'_'); }
-function fmtTime(ms) {
-  if (!ms && ms!==0) return '00:00:00';
-  const t = Math.floor(ms/1000);
-  const h = Math.floor(t/3600).toString().padStart(2,'0');
-  const m = Math.floor((t%3600)/60).toString().padStart(2,'0');
-  const s = (t%60).toString().padStart(2,'0');
-  return `${h}:${m}:${s}`;
-}
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2000);
-}
-
-startTick();
+// Init
+load();
+document.getElementById('codeInput').value = gameState.code;
+renderTeams();
+updateTeamStatus();
+setInterval(updateTeamStatus, 500);
 </script>
+
 </body>
 </html>
