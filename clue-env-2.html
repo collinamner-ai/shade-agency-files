@@ -54,7 +54,8 @@
     font-weight: 400;
     letter-spacing: 0.35em;
     text-transform: uppercase;
-    color: #555;
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(255,255,255,0.35);
   }
 
   .evidence-heading {
@@ -63,8 +64,9 @@
     font-weight: 600;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #f0ece0;
+    color: #ffffff;
     margin-top: 6px;
+    text-shadow: 0 0 8px rgba(255,255,255,0.35);
   }
 
   .evidence-body {
@@ -95,7 +97,7 @@
 
   /* subtle dot/dash indicator beneath the circle */
   .morse-symbol {
-    height: 18px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -106,30 +108,32 @@
   .morse-symbol.show { opacity: 1; }
 
   .morse-symbol .sym-dot {
-    width: 8px;
-    height: 8px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    background: #444;
+    background: #ffffff;
+    box-shadow: 0 0 12px rgba(255,255,255,0.75);
   }
 
   .morse-symbol .sym-dash {
-    width: 38px;
-    height: 4px;
+    width: 58px;
+    height: 18px;
     border-radius: 2px;
-    background: #444;
+    background: #ffffff;
+    box-shadow: 0 0 12px rgba(255,255,255,0.75);
   }
 
   .btn-start {
     padding: 15px 48px;
     background: transparent;
-    border: 1px solid #333;
+    border: 1px solid #ffffff;
     border-radius: 3px;
     font-family: 'Oswald', sans-serif;
     font-size: 17px;
     font-weight: 600;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: #f0ece0;
+    color: #ffffff;
     cursor: pointer;
     transition: border-color 0.15s, color 0.15s;
   }
@@ -142,24 +146,25 @@
   .btn-repeat {
     display: none;
     padding: 12px 40px;
-    background: transparent;
-    border: 1px solid #2a2a2a;
+    background: #1f8f3a;
+    border: 1px solid #35c75f;
     border-radius: 3px;
     font-family: 'Oswald', sans-serif;
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 600;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: #444;
+    color: #ffffff;
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
   }
 
   .btn-repeat.visible { display: block; }
 
   .btn-repeat:active {
-    border-color: #555;
-    color: #888;
+    background: #35c75f;
+    border-color: #6ee68b;
+    color: #ffffff;
   }
 
   /* ── TRANSMISSION STATUS ── */
@@ -168,14 +173,15 @@
     font-size: 11px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #333;
+    color: #ffffff;
     text-align: center;
     min-height: 16px;
     transition: color 0.3s;
+    text-shadow: 0 0 8px rgba(255,255,255,0.35);
   }
 
   .transmission-status.active {
-    color: #555;
+    color: #ffffff;
   }
 
   /* ════════════════════════════════════════
