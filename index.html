@@ -1,107 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>SHADE · Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
-<style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>SHADE · Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-html, body {
-  min-height:100vh;
-  background:#0a0b0c;
-  color:#f0ece0;
-  font-family:'Oswald', sans-serif;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
+    html, body {
+      min-height:100vh;
+      background:#0a0b0c;
+      color:#f0ece0;
+      font-family:'Oswald', sans-serif;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
 
-.page {
-  width:100%;
-  max-width:520px;
-  padding:48px 32px max(48px, env(safe-area-inset-bottom, 48px));
-  padding-top:max(48px, env(safe-area-inset-top, 48px));
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:36px;
-}
+    .page {
+      width:100%;
+      max-width:520px;
+      padding:48px 32px max(48px, env(safe-area-inset-bottom, 48px));
+      padding-top:max(48px, env(safe-area-inset-top, 48px));
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:36px;
+    }
 
-.header { display:flex; flex-direction:column; align-items:center; gap:14px; }
-.header img { width:200px; height:200px; object-fit:contain; }
-.header-name { font-size:28px; font-weight:700; letter-spacing:0.25em; text-align:center; }
-.header-ref  { font-family:'Courier Prime', monospace; font-size:10px; letter-spacing:0.25em; text-transform:uppercase; color:#c9a84c; text-align:center; }
+    .header { display:flex; flex-direction:column; align-items:center; gap:14px; }
+    .header img { width:200px; height:200px; object-fit:contain; }
+    .header-name { font-size:28px; font-weight:700; letter-spacing:0.25em; text-align:center; }
+    .header-ref  { font-family:'Courier Prime', monospace; font-size:10px; letter-spacing:0.25em; text-transform:uppercase; color:#c9a84c; text-align:center; }
 
-.divider { width:100%; height:1px; background:linear-gradient(to right, transparent, #2c3035, transparent); }
+    .divider { width:100%; height:1px; background:linear-gradient(to right, transparent, #2c3035, transparent); }
 
-.btn-grid { display:flex; flex-direction:column; gap:10px; width:100%; }
+    .btn-grid { display:flex; flex-direction:column; gap:10px; width:100%; }
 
-.btn-link {
-  display:flex; align-items:center; justify-content:space-between;
-  width:100%; padding:18px 22px;
-  background:#141618; border:1px solid #2c3035; border-radius:4px;
-  font-family:'Oswald', sans-serif; font-size:17px; font-weight:600;
-  letter-spacing:0.08em; text-transform:uppercase; color:#f0ece0;
-  text-decoration:none; cursor:pointer; transition:border-color 0.15s, background 0.15s;
-}
-.btn-link:hover  { background:#1c1f22; border-color:#c9a84c; }
-.btn-label { flex:1; }
-.btn-arrow { color:#444; font-size:20px; flex-shrink:0; }
+    .btn-link {
+      display:flex; align-items:center; justify-content:space-between;
+      width:100%; padding:18px 22px;
+      background:#141618; border:1px solid #2c3035; border-radius:4px;
+      font-family:'Oswald', sans-serif; font-size:17px; font-weight:600;
+      letter-spacing:0.08em; text-transform:uppercase; color:#f0ece0;
+      text-decoration:none; cursor:pointer; transition:border-color 0.15s, background 0.15s;
+    }
+    .btn-link:hover { background:#1c1f22; border-color:#c9a84c; }
+    .btn-label { flex:1; }
+    .btn-arrow { color:#444; font-size:20px; flex-shrink:0; }
 
-/* ── WIDE (tablet / laptop) ── */
-@media (min-width: 700px) {
-  .page { max-width:860px; flex-direction:row; align-items:center; gap:64px; padding:60px 60px; }
-  .header { flex-shrink:0; width:240px; }
-  .header img { width:220px; height:220px; }
-  .header-name { font-size:34px; }
-  .divider { display:none; }
-  .vsep { display:block !important; width:1px; height:300px; background:linear-gradient(to bottom, transparent, #2c3035, transparent); flex-shrink:0; }
-  .btn-grid { gap:12px; }
-  .btn-link { font-size:18px; padding:20px 24px; }
-}
+    /* Admin access modal */
+    .modal-backdrop {
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background:rgba(0,0,0,0.82);
+      backdrop-filter:blur(5px);
+      z-index:9999;
+    }
 
-@media (min-width:1100px) {
-  .page { gap:80px; padding:60px 80px; }
-  .header img { width:190px; height:190px; }
-  .btn-link { font-size:20px; padding:22px 28px; }
-}
-</style>
+    .modal-backdrop.active { display:flex; }
+
+    .access-modal {
+      width:min(100%, 430px);
+      background:#111315;
+      border:1px solid #c9a84c;
+      border-radius:6px;
+      padding:28px;
+      box-shadow:0 22px 70px rgba(0,0,0,0.55);
+    }
+
+    .access-kicker {
+      margin-bottom:10px;
+      color:#c9a84c;
+      font-family:'Courier Prime', monospace;
+      font-size:10px;
+      letter-spacing:0.24em;
+      text-transform:uppercase;
+    }
+
+    .access-modal h2 {
+      font-size:24px;
+      line-height:1.15;
+      letter-spacing:0.04em;
+      text-transform:uppercase;
+      margin-bottom:12px;
+    }
+
+    .access-message {
+      color:#b9b7b0;
+      font-family:'Courier Prime', monospace;
+      font-size:13px;
+      line-height:1.6;
+      margin-bottom:20px;
+    }
+
+    .code-label {
+      display:block;
+      margin-bottom:8px;
+      color:#f0ece0;
+      font-size:12px;
+      letter-spacing:0.15em;
+      text-transform:uppercase;
+    }
+
+    .code-input {
+      width:100%;
+      padding:14px 15px;
+      border:1px solid #34383d;
+      border-radius:4px;
+      outline:none;
+      background:#090a0b;
+      color:#f0ece0;
+      font-family:'Courier Prime', monospace;
+      font-size:18px;
+      letter-spacing:0.25em;
+      text-align:center;
+    }
+
+    .code-input:focus { border-color:#c9a84c; }
+
+    .access-error {
+      min-height:20px;
+      margin-top:9px;
+      color:#d66b63;
+      font-family:'Courier Prime', monospace;
+      font-size:11px;
+      letter-spacing:0.06em;
+    }
+
+    .modal-actions {
+      display:flex;
+      gap:10px;
+      margin-top:15px;
+    }
+
+    .modal-btn {
+      flex:1;
+      padding:13px 16px;
+      border-radius:4px;
+      border:1px solid #34383d;
+      background:#181a1d;
+      color:#f0ece0;
+      font-family:'Oswald', sans-serif;
+      font-size:14px;
+      font-weight:600;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      cursor:pointer;
+    }
+
+    .modal-btn:hover { border-color:#c9a84c; }
+    .modal-btn.primary { background:#c9a84c; border-color:#c9a84c; color:#0a0b0c; }
+
+    @media (min-width: 700px) {
+      .page { max-width:860px; flex-direction:row; align-items:center; gap:64px; padding:60px 60px; }
+      .header { flex-shrink:0; width:240px; }
+      .header img { width:220px; height:220px; }
+      .header-name { font-size:34px; }
+      .divider { display:none; }
+      .vsep { display:block !important; width:1px; height:300px; background:linear-gradient(to bottom, transparent, #2c3035, transparent); flex-shrink:0; }
+      .btn-grid { gap:12px; }
+      .btn-link { font-size:18px; padding:20px 24px; }
+    }
+
+    @media (min-width:1100px) {
+      .page { gap:80px; padding:60px 80px; }
+      .header img { width:190px; height:190px; }
+      .btn-link { font-size:20px; padding:22px 28px; }
+    }
+  </style>
 </head>
 <body>
-<div class="page">
+  <div class="page">
+    <div class="header">
+      <img src="assets/img/shade-seal.png" alt="SHADE Seal">
+      <div class="header-name">SHADE</div>
+      <div class="header-ref">Admin Access</div>
+    </div>
 
-  <div class="header">
-    <img src="assets/img/shade-seal.png" alt="SHADE Seal">
-    <div class="header-name">SHADE</div>
-    <div class="header-ref">Admin Access</div>
+    <div class="divider"></div>
+    <div class="vsep" style="display:none"></div>
+
+    <div class="btn-grid">
+      <a class="btn-link" href="clue-env-1.html">
+        <span class="btn-label">Evidence 1</span>
+        <span class="btn-arrow">›</span>
+      </a>
+      <a class="btn-link" href="clue-env-2.html">
+        <span class="btn-label">Evidence 2</span>
+        <span class="btn-arrow">›</span>
+      </a>
+      <a class="btn-link" href="final-disarm.html">
+        <span class="btn-label">Final Code</span>
+        <span class="btn-arrow">›</span>
+      </a>
+      <a class="btn-link" id="adminPanelButton" href="shade-admin.html">
+        <span class="btn-label">Admin Panel</span>
+        <span class="btn-arrow">›</span>
+      </a>
+    </div>
   </div>
 
-  <div class="divider"></div>
-  <div class="vsep" style="display:none"></div>
+  <div class="modal-backdrop" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+    <div class="access-modal">
+      <div class="access-kicker">Restricted Access</div>
+      <h2 id="adminModalTitle">You are not authorised to access this page</h2>
+      <p class="access-message">Enter the authorised access code to continue to the admin panel.</p>
 
-  <div class="btn-grid">
-    <a class="btn-link" href="clue-env-1.html">
-      <span class="btn-label">Evidence 1</span>
-      <span class="btn-arrow">›</span>
-    </a>
-    <a class="btn-link" href="clue-env-2.html">
-      <span class="btn-label">Evidence 2</span>
-      <span class="btn-arrow">›</span>
-    </a>
-    <a class="btn-link" href="final-disarm.html">
-      <span class="btn-label">Final Code</span>
-      <span class="btn-arrow">›</span>
-    </a>
-    <a class="btn-link" href="shade-admin.html">
-      <span class="btn-label">Admin Panel</span>
-      <span class="btn-arrow">›</span>
-    </a>
+      <form id="adminAccessForm">
+        <label class="code-label" for="adminCode">Access Code</label>
+        <input
+          class="code-input"
+          id="adminCode"
+          name="adminCode"
+          type="password"
+          inputmode="numeric"
+          autocomplete="off"
+          maxlength="3"
+          placeholder="•••"
+          aria-describedby="accessError"
+        >
+        <div class="access-error" id="accessError" aria-live="polite"></div>
+
+        <div class="modal-actions">
+          <button class="modal-btn" type="button" id="cancelAdmin">Cancel</button>
+          <button class="modal-btn primary" type="submit">Enter</button>
+        </div>
+      </form>
+    </div>
   </div>
 
-</div>
+  <script>
+    const ADMIN_CODE = '007';
+    const ADMIN_URL = 'shade-admin.html';
+
+    const adminButton = document.getElementById('adminPanelButton');
+    const adminModal = document.getElementById('adminModal');
+    const adminForm = document.getElementById('adminAccessForm');
+    const adminCode = document.getElementById('adminCode');
+    const accessError = document.getElementById('accessError');
+    const cancelAdmin = document.getElementById('cancelAdmin');
+
+    function openAdminModal(event) {
+      event.preventDefault();
+      accessError.textContent = '';
+      adminCode.value = '';
+      adminModal.classList.add('active');
+      setTimeout(() => adminCode.focus(), 50);
+    }
+
+    function closeAdminModal() {
+      adminModal.classList.remove('active');
+      accessError.textContent = '';
+      adminCode.value = '';
+      adminButton.focus();
+    }
+
+    adminButton.addEventListener('click', openAdminModal);
+    cancelAdmin.addEventListener('click', closeAdminModal);
+
+    adminModal.addEventListener('click', (event) => {
+      if (event.target === adminModal) closeAdminModal();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && adminModal.classList.contains('active')) {
+        closeAdminModal();
+      }
+    });
+
+    adminForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      if (adminCode.value === ADMIN_CODE) {
+        window.location.href = ADMIN_URL;
+        return;
+      }
+
+      accessError.textContent = 'ACCESS DENIED — INVALID CODE';
+      adminCode.value = '';
+      adminCode.focus();
+    });
+  </script>
 </body>
 </html>
